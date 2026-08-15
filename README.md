@@ -2,6 +2,13 @@
 
 <img width="1582" height="1036" alt="Homepage" src="https://github.com/user-attachments/assets/3288bcc8-bb7c-479b-9669-ccffa563785a" />
 
+# v1.6.2
+This version introduces some fixes along with some new CICD features. The deployment is now handled by GitHub Actions.
+There are two workflows: a deploy workflow and a revert workflow. Deploy changes and wait for the server to come back
+up. If there are any issues preventing the app from showing, the revert workflow can be used to revert the changes back
+to the previous version. Once a fix is identified, we can deploy the changes again. Once changes are confirmed to be
+working, you're done.
+
 # v1.6.1
 This version introduced many GitHub instruction files used to add context for new AI tools introduced recently. There
 was also a small fix included which addressed an issue when searching for a particular Pokémon. Now, if a 'name' is
