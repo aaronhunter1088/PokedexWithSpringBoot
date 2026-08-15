@@ -29,6 +29,7 @@
         <spring.boot.version>4.1.0-M4</spring.boot.version>
         <taglibs.standard.version>1.2.5</taglibs.standard.version>
         <taglibs.standard.impl.version>1.2.5</taglibs.standard.impl.version>
+        <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     </properties>
 
     <!-- Included in Parent. Left as a reference
@@ -208,6 +209,22 @@
             </resource>
         </resources>
 
+        <!-- Override maven-war-plugin version inherited from spring-boot-dependencies BOM
+             (2.2) to avoid 'Cannot access defaults field of Properties' error on Java 16+.
+             Must be in pluginManagement so the default-war lifecycle binding picks it up. -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${maven.war.plugin.version}</version>
+                    <configuration>
+                        <failOnMissingWebXml>false</failOnMissingWebXml>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <!-- NOTES -->
         <!-- Assembly:single creates Pokedex-#.jar -->
         <!-- Mvn:package creates Pokedex-#-jar-with-dependencies.jar -->
@@ -233,6 +250,19 @@
                     <!--                    <outputDirectory>${outputDirectory}</outputDirectory>-->
                     <!--                    <excludeDevtools>true</excludeDevtools>-->
                     <!--                    <layers enabled="false"/>-->
+                </configuration>
+            </plugin>
+            <!-- Maven WAR Plugin
+                     Explicitly pinned to 3.4.0+ to avoid the
+                     'Cannot access defaults field of Properties' error
+                     caused by illegal reflective access when running
+                     on Java 16+ with older plugin versions. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>${maven.war.plugin.version}</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
             <!-- Compile found in parent -->

@@ -2,9 +2,8 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-# This workflow will test connection to the VPS, checking out
-# the code, setting up Java and Gradle, build the code, and
-# upload to the temporary directory.
+# This workflow will check out the code, set up Java, build
+# the code, and upload to the temporary directory.
 # For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
 
 name: Deploy Pokédex Spring Boot
@@ -26,7 +25,7 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - name: Build Pokédex War
+      - name: Build Pokédex WAR
         run: ./mvnw clean package
         
       - name: Upload Pokédex WAR
