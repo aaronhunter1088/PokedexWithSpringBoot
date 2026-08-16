@@ -92,7 +92,7 @@ jobs:
 
             # Prepare New Version
             sudo rm -rf MyPokedex/springboot 
-            sudo mv /tmp/deploy/build/libs/Pokedex-1.6.2-boot.war /opt/tomcat11/Pokedex/springboot.war
+            sudo mv /tmp/deploy/1.6.2/Pokedex-1.6.2-boot.war /opt/tomcat11/Pokedex/springboot.war
 
             # Update Ownership
             sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/springboot/*
