@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  setup: 
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-          
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
