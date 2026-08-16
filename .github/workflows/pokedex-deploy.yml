@@ -84,11 +84,10 @@ jobs:
             sudo systemctl stop tomcat11
 
             # Copy Previous Working Version
-            cd /opt/tomcat11
-            sudo rm -rf MyPokedexBackup/springboot
-            sudo rm -rf MyPokedexBackup/springboot.war
-            sudo mkdir -p MyPokedexBackup/springboot
             sudo cp -a /opt/tomcat11/MyPokedex/springboot/. /opt/tomcat11/MyPokedexBackup/springboot/
+            sudo rm -rf /opt/tomcat11/MyPokedexBackup/springboot
+            sudo rm -rf /opt/tomcat11/MyPokedexBackup/springboot.war
+            sudo mkdir -p /opt/tomcat11/MyPokedexBackup/springboot
 
             # Prepare New Version
             sudo rm -rf MyPokedex/springboot 
