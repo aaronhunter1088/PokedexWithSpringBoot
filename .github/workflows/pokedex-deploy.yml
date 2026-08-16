@@ -16,8 +16,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Checkout Parent
+        uses: actions/checkout@v4
+        with:
+          repository: aaronhunter1088/parent
+          path: parent
+          token: ${{ secrets.PARENT_REPO_TOKEN }}
+
+      - name: Checkout pokeapi-reactor
+        uses: actions/checkout@v4
+        with:
+          repository: aaronhunter1088/pokeapi-reactor
+          path: reactor
+          token: ${{ secrets.REACTOR_REPO_TOKEN }}
 
       - name: Set up Java
         uses: actions/setup-java@v5.7.0
@@ -25,8 +39,14 @@ jobs:
           distribution: temurin
           java-version: '25'
 
+      - name: Install Parent POM
+        run: mvn -f parent/pom.xml install -DskipTests
+
+      - name: Install pokeapi-reactor
+        run: mvn -f reactor/pom.xml install -DskipTests
+
       - name: Build Pokédex WAR
-        run: ./mvnw clean package
+        run: ./mvnw clean install
         
       - name: Upload Pokédex WAR
         uses: appleboy/scp-action@v1
@@ -34,7 +54,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "build/libs/Pokedex-*-boot.war"
+          source: "build/libs/Pokedex-1.6.2-boot.war"
           target: "/tmp/deploy"
 
       - name: Copy Previous Working Version, Deploy Plain WAR
@@ -46,6 +66,10 @@ jobs:
           script: |
             # Stop script on a failing command rather than blindly continuing
             set -e
+
+            # Verify new JAR exists before touching production
+            test -n "$(find /tmp/deploy/dist -type f -name 'Pokedex-*-boot.war' -print -quit)"
+            
             # Stop Tomcat 11 Service
             sudo systemctl stop tomcat11
 
@@ -57,17 +81,13 @@ jobs:
             sudo cp -a MyPokedex/springboot/. MyPokedexBackup/springboot/
 
             # Prepare New Version
-            sudo rm -rf Mixology 
-            sudo mkdir Mixology
-            sudo mv /tmp/deploy/build/libs/Pokedex-*-boot.war /opt/tomcat11/Pokedex/springboot.war
+            sudo rm -rf MyPokedex/springboot 
+            sudo mv /tmp/deploy/build/libs/Pokedex-1.6.2-boot.war /opt/tomcat11/Pokedex/springboot.war
 
             # Update Ownership
-            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/springboot
-            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/springboot
-
-            # Update Permissions
-            sudo find /opt/tomcat11/MyPokedex/springboot -type d -exec chmod 755 {} \;
-            sudo find /opt/tomcat11/MyPokedex/springboot -type f -exec chmod 644 {} \;
+            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/springboot/*
+            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/springboot/*
+            sudo chmod 755 /opt/tomcat11/MyPokedex/springboot.war
 
             # Start Tomcat 11 Service
             sudo systemctl start tomcat11
