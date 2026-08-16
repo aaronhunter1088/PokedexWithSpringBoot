@@ -1,4 +1,4 @@
-# Pokédex - A Spring Boot App
+# Pokédex With Spring Boot
 
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml)
