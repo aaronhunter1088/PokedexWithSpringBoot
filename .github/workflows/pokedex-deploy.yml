@@ -46,7 +46,7 @@ jobs:
         run: mvn -f reactor/pom.xml install -DskipTests
 
       - name: Build Pokédex WAR
-        run: ./mvnw clean install
+        run: mvn clean package
         
       - name: Upload Pokédex WAR
         uses: appleboy/scp-action@v1
