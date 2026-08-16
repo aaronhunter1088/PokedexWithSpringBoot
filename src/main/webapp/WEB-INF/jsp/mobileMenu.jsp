@@ -39,14 +39,17 @@
         </label>
     </div>
 
-    <div class="mobile-menu-item mobile-gif-item">
+    <div class="mobile-menu-item search-box" style="--search-shadow-color:${tileColorParam}; --search-input-color:${tileColorParam};">
         <label for="searchMobile">Search for Pkmn</label>
         <input id="searchMobile" name="searchMobile" type="text" placeholder="Name or ID"/>
-        <img alt="Get Pokémon"
-             src="${pageContext.request.contextPath}/images/pokeball_search.png"
-             style="width:30px; height:30px; cursor: pointer;"
-             title="Search for Pkmn"
-             onclick="searchForPkmn();">
+        <div class="search-icon">
+            <img alt="Get Pokémon"
+                 src="${pageContext.request.contextPath}/images/pokeball_search.png"
+                 style="width:30px; height:30px; cursor: pointer;"
+                 class="search-icon"
+                 title="Search for Pkmn"
+                 onclick="searchForPkmn();">
+        </div>
     </div>
 
     <div class="mobile-menu-item mobile-gif-item">

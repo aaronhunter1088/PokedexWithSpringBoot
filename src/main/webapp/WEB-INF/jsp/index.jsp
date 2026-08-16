@@ -98,12 +98,13 @@
                 ${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}
             </label>
             &emsp;
-            <div id="searchForPkmn" style="display:flex;">
-                <label for="search" style="display:none;"></label>
-                <input id="search" name="search" type="text" placeholder="Name or ID" style="width:100px;"/>
-                <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
-                     class="button cursor" title="Search for Pokemon" style="height:30px;width:30px;"
-                     onclick="searchForPkmn(${isDarkMode})">
+            <div id="searchForPkmn" class="search-box" style="display:flex; --search-shadow-color:${tileColorParam};">
+                <input id="search" name="search" type="text" placeholder="Name or ID"/>
+                <div class="search-icon">
+                    <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
+                         class="button cursor search-icon" title="Search for Pokemon" style="height:30px;width:30px;"
+                         onclick="searchForPkmn(${isDarkMode})">
+                </div>
             </div>
             &emsp;
             <div id="jumpToPage" style="display:flex;">
