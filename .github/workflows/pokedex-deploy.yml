@@ -52,6 +52,9 @@ jobs:
       - name: Install pokeapi-reactor
         run: mvn -f reactor/pom.xml install -DskipTests
 
+      - name: Install pokedex-api
+        run: mvn -f pokedexapi/pom.xml install -DskipTests
+        
       - name: Build Pokédex WAR
         run: mvn clean package
         
