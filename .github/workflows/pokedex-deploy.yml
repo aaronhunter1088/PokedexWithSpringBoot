@@ -33,6 +33,13 @@ jobs:
           path: reactor
           token: ${{ secrets.REACTOR_REPO_TOKEN }}
 
+      - name: Checkout PokedexApi
+        uses: actions/checkout@v4
+        with:
+          repository: aaronhunter1088/PokedexApi
+          path: pokedexapi
+          token: ${{ secrets.POKEDEXAPI_REPO_TOKEN }}
+
       - name: Set up Java
         uses: actions/setup-java@v5.7.0
         with:
