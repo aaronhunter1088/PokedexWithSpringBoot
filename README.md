@@ -2,6 +2,8 @@
 
 <img width="1582" height="1036" alt="Homepage" src="https://github.com/user-attachments/assets/3288bcc8-bb7c-479b-9669-ccffa563785a" />
 
+[![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml)
+
 # v1.6.2
 This version introduces some fixes along with some new CICD features. The deployment is now handled by GitHub Actions.
 There are two workflows: a deploy workflow and a revert workflow. Deploy changes and wait for the server to come back
