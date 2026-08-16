@@ -10,6 +10,11 @@ name: Deploy Pokédex Spring Boot
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+        type: string
 
 jobs:
   deploy: 
@@ -32,7 +37,7 @@ jobs:
           path: parent
           token: ${{ secrets.PARENT_REPO_TOKEN }}
 
-      - name: Checkout pokeapi-reactor
+      - name: Checkout Pokeapi-reactor
         uses: actions/checkout@v4
         with:
           repository: aaronhunter1088/pokeapi-reactor
@@ -46,13 +51,13 @@ jobs:
           path: pokedexapi
           token: ${{ secrets.POKEDEXAPI_REPO_TOKEN }}
 
-      - name: Install Parent POM
+      - name: Install Parent
         run: mvn -f parent/pom.xml install -DskipTests
 
-      - name: Install pokeapi-reactor
+      - name: Install Pokeapi-reactor
         run: mvn -f reactor/pom.xml install -DskipTests
 
-      - name: Install pokedex-api
+      - name: Install Pokedex-api
         run: mvn -f pokedexapi/pom.xml install -DskipTests
         
       - name: Build Pokédex WAR
@@ -64,10 +69,10 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "dist/1.6.2/Pokedex-1.6.2-boot.war"
+          source: "dist/${{ inputs.version }}/Pokedex-${{ inputs.version }}-boot.war"
           target: "/tmp/deploy"
 
-      - name: Copy Previous Working Version, Deploy Plain WAR
+      - name: Copy Previous Working Version, Deploy new WAR
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -78,7 +83,7 @@ jobs:
             set -e
 
             # Verify new JAR exists before touching production
-            test -n "$(find /tmp/deploy/dist/1.6.2/ -type f -name 'Pokedex-*-boot.war' -print -quit)"
+            test -n "$(find /tmp/deploy/dist/${{ inputs.version }}/ -type f -name 'Pokedex-*-boot.war' -print -quit)"
             
             # Stop Tomcat 11 Service
             sudo systemctl stop tomcat11
@@ -91,7 +96,8 @@ jobs:
 
             # Prepare New Version
             sudo rm -rf /opt/tomcat11/MyPokedex/springboot 
-            sudo mv /tmp/deploy/dist/1.6.2/Pokedex-1.6.2-boot.war /opt/tomcat11/MyPokedex/springboot.war
+            sudo mv /tmp/deploy/dist/${{ inputs.version }}/Pokedex-${{ inputs.version }}-boot.war \
+                    /opt/tomcat11/MyPokedex/springboot.war
 
             # Update Ownership
             sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/*
