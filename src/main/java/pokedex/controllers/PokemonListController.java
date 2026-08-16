@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,6 +25,8 @@ public class PokemonListController extends BaseController
 {
     /* Logging instance */
     private static final Logger LOGGER = LogManager.getLogger(PokemonListController.class);
+    private static final String TILE_COLOR_SESSION_KEY = "tileColorParam";
+    private static final String DEFAULT_TILE_COLOR = "#4CAF50";
 
 
     @Autowired
@@ -38,17 +41,26 @@ public class PokemonListController extends BaseController
 
     @GetMapping("/")
     public ModelAndView homepage(ModelAndView mav, HttpSession httpSession,
-           @RequestParam(name = "darkmode", required = false) String darkmode)
+           @RequestParam(name = "darkmode", required = false) String darkmode,
+           @RequestParam(name = "tileColor", required = false) String tileColor)
     {
-        // The URL changes but keeps darkmode
-        // From http://localhost:4201?darkmode=true/false
-        // To   http://localhost:4201
         if (darkmode != null) {
             httpSession.setAttribute("isDarkMode", Boolean.parseBoolean(darkmode));
             darkmodeService.setDarkmode(Boolean.parseBoolean(darkmode));
+        }
+        if (tileColor != null && !tileColor.isBlank()) {
+            httpSession.setAttribute(TILE_COLOR_SESSION_KEY, sanitizeTileColor(tileColor));
+        }
+        if (StringUtils.hasText(darkmode) || StringUtils.hasText(tileColor)) {
+            LOGGER.info("Homepage accessed with darkmode: {} and tileColor: {}", darkmode, tileColor);
             return new ModelAndView("redirect:/");
         }
 
+        return renderHomepage(mav, httpSession);
+    }
+
+    private ModelAndView renderHomepage(ModelAndView mav, HttpSession httpSession)
+    {
         //Object sessionDarkMode = httpSession.getAttribute("isDarkMode");
         //isDarkMode = sessionDarkMode instanceof Boolean && (Boolean) sessionDarkMode;
         isDarkMode = darkmodeService.isDarkmode();
@@ -73,6 +85,8 @@ public class PokemonListController extends BaseController
         mav.addObject("chosenType", chosenType);
         //isDarkMode = darkmode.equals("true");
         mav.addObject("isDarkMode", isDarkMode);
+        Object tileColorFromSession = httpSession.getAttribute(TILE_COLOR_SESSION_KEY);
+        mav.addObject("tileColorParam", tileColorFromSession instanceof String ? tileColorFromSession : DEFAULT_TILE_COLOR);
         mav.addObject("env",
                 Arrays.asList(environment.getActiveProfiles())
                         .contains("production") ? "production" : "dev");
@@ -118,7 +132,7 @@ public class PokemonListController extends BaseController
         this.pokemonMap.clear();
         // Clear session cache when changing pages
         httpSession.removeAttribute("pokemonMap");
-        return homepage(mav, httpSession, darkmodeService.isDarkmode() ? "true" : "false");
+        return renderHomepage(mav, httpSession);
     }
 
     @GetMapping("/pkmnPerPage")
@@ -159,6 +173,12 @@ public class PokemonListController extends BaseController
         this.pokemonMap.clear();
         LOGGER.info("Type filter set to: {}", this.chosenType);
         return ResponseEntity.ok().body("chosenType set");
+    }
+
+    private String sanitizeTileColor(String colorValue) {
+        return colorValue != null && colorValue.matches("^#[0-9A-Fa-f]{6}$")
+                ? colorValue
+                : DEFAULT_TILE_COLOR;
     }
 
 }

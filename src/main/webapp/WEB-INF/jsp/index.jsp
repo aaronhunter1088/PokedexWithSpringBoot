@@ -84,7 +84,9 @@
                 <span class="slider round"></span>
             </label>
             &nbsp;
-            <label style="margin:10px auto;width:auto;padding-top:0;">Show GIFs</label>
+            <label style="margin:10px auto;width:auto;padding-top:0;">
+                Show GIFs
+            </label>
             &emsp;
             <label class="switch" title="Toggle darkmode">
                 <input id="gifSwitchDarkmode" type="checkbox" ${isDarkMode ? 'checked' : ''}
@@ -121,6 +123,7 @@
             </div>
             &emsp;
             <button class="back-to-landing-btn icon" onclick="navigateToLandingPage()"
+                    style="background-color:${tileColorParam};"
                     title="Return to Landing Page">
                 Back to Landing Page
             </button>
@@ -200,6 +203,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script>
         $(function() {
+            clearHomepageQueryParams();
             updateGifToggle(false, "${showGifs}");
 
             let ids = "${pokemonIds}".replace(/[\[\]]/g, '').split(',').map(id => id.trim());
@@ -252,6 +256,16 @@
                 }
             });
         });
+
+        function clearHomepageQueryParams() {
+            const currentUrl = new URL(window.location.href);
+            if (!currentUrl.searchParams.has('darkmode') && !currentUrl.searchParams.has('tileColor')) {
+                return;
+            }
+
+            const cleanUrl = currentUrl.pathname + currentUrl.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
 
         // mobile menu functions
 

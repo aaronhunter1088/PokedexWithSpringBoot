@@ -67,6 +67,7 @@
 
     <div class="mobile-menu-item">
         <button class="back-to-landing-btn icon" onclick="navigateToLandingPage()"
+                style="background-color:${tileColorParam};"
                 title="Return to Landing Page">
             Back to Landing Page
         </button>
