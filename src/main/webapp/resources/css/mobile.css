@@ -417,7 +417,7 @@
 
     .search-icon {
         position: absolute;
-        right: 10px;
+        right: 5px;
         width: 70px;
         height: 70px;
         display: flex;
@@ -425,7 +425,7 @@
         align-items: center;
         color: #1a1a1a;
         font-size: 1.3rem;
-        margin-top: 10px;
+        margin-top: 5px;
         z-index: 2;
         cursor: pointer;
     }
