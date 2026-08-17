@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>Pokedex</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.3</version>
     <packaging>war</packaging>
     <name>Pokédex</name>
     <description>Springboot Pokédex App</description>
@@ -25,7 +25,7 @@
         <jakarta.servlet.jstl.version>3.0.1</jakarta.servlet.jstl.version>
         <jakarta.servlet.jstl-api.version>3.0.2</jakarta.servlet.jstl-api.version>
         <jakarta.ws.rs-api.version>4.0.0</jakarta.ws.rs-api.version>
-        <pokedex.api.version>1.6.2</pokedex.api.version>
+        <pokedexapi.version>1.6.3</pokedexapi.version>
         <!-- Used to test new versions --><!--
         <spring.boot.version>4.1.0</spring.boot.version> -->
         <taglibs.standard.version>1.2.5</taglibs.standard.version>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.skvllprodvctions</groupId>
             <artifactId>PokedexApi</artifactId>
-            <version>${pokedex.api.version}</version>
+            <version>${pokedexapi.version}</version>
             <classifier>code</classifier>
             <exclusions>
                 <!-- spring-boot-starter-logging -->
