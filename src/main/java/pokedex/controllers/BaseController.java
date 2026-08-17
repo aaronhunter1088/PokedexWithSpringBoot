@@ -255,6 +255,10 @@ public class BaseController
 //            }
             listOfPokemon.forEach(pkmn -> {
                 Pokemon pokemon = pokemonService.getPokemonByIdOrName(pkmn.name());
+                if (pokemon == null) {
+                    LOGGER.warn("Skipping {} — getPokemonByIdOrName returned null (API may not be ready yet)", pkmn.name());
+                    return;
+                }
                 String color = "white";
                 PokemonSpecies speciesData = null;
                 try {
@@ -267,6 +271,10 @@ public class BaseController
                 }
                 catch (Exception e) {
                     LOGGER.warn("No speciesData found using {} and service species call", pkmn);
+                    if (pokemon.species() == null || pokemon.species().url() == null) {
+                        LOGGER.error("Cannot fall back for {} — species URL is null", pokemon.id());
+                        return;
+                    }
                     LOGGER.info("Trying direct call with species: {}, url: {}", pokemon.species().name(), pokemon.species().url());
                     try {
                         String responseBody = pokemonService.callUrl(pokemon.species().url()).body();
