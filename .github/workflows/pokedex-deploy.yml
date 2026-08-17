@@ -83,7 +83,7 @@ jobs:
             set -e
 
             # Verify new JAR exists before touching production
-            test -n "$(find /tmp/deploy/dist/${{ inputs.version }}/ -type f -name 'Pokedex-*-boot.war' -print -quit)"
+            test -n "$(find /tmp/deploy/dist/* / -type f -name 'Pokedex-*-boot.war' -print -quit)"
             
             # Stop Tomcat 11 Service
             sudo systemctl stop tomcat11

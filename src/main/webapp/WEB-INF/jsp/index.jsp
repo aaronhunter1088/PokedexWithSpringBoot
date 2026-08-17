@@ -102,7 +102,7 @@
                 <input id="search" name="search" type="text" placeholder="Name or ID"/>
                 <div class="search-icon">
                     <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
-                         class="button cursor search-icon" title="Search for Pokemon"
+                         class="button cursor search-icon" title="Search for Pokemon" style="height:50px;width:50px;"
                          onclick="searchForPkmn(${isDarkMode})">
                 </div>
             </div>
