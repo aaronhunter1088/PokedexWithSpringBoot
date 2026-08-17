@@ -39,33 +39,38 @@
         </label>
     </div>
 
-    <div class="mobile-menu-item search-box" style="--search-shadow-color:${tileColorParam}; --search-input-color:${tileColorParam};">
-        <label for="searchMobile">Search for Pkmn</label>
-        <input id="searchMobile" name="searchMobile" type="text" placeholder="Name or ID"/>
-        <div class="search-icon">
-            <img alt="Get Pokémon"
-                 src="${pageContext.request.contextPath}/images/pokeball_search.png"
-                 style="width:30px; height:30px; cursor: pointer;"
-                 class="search-icon"
-                 title="Search for Pkmn"
-                 onclick="searchForPkmn();">
+    <div class="mobile-menu-item">
+        <div class="search-box" style="--search-shadow-color:${tileColorParam}; --search-input-color:${tileColorParam};">
+            <input id="searchMobile" name="searchMobile" type="text" placeholder="Name or ID"/>
+            <div class="search-icon" onclick="searchForPkmn();">
+                <img alt="Get Pokémon"
+                     src="${pageContext.request.contextPath}/images/pokeball_search.png"
+                     style="width:50px; height:50px; cursor: pointer;"
+                     title="Search for Pkmn">
+            </div>
         </div>
     </div>
 
-    <div class="mobile-menu-item mobile-gif-item">
-        <label for="pageNumberMobile">Jump to Page</label>
-        <input id="pageNumberMobile" name="pageNumberMobile" type="text" placeholder="Page #"/>
-        <i class="fa-regular fa-circle-right" style="font-size:30px; cursor:pointer; color:${isDarkMode?'white':'black'}"
-           onclick="setPageToViewMobile();" title="Jump to Page">
-        </i>
+    <div class="mobile-menu-item">
+        <div class="mobile-search-box" style="--search-shadow-color:${tileColorParam}; background-color:${isDarkMode?'#1a1a1a':'whitesmoke'};">
+            <input id="pageNumberMobile" name="pageNumberMobile" type="text" placeholder="Jump to Page"
+                   style="color:${isDarkMode?'white':'black'};"/>
+            <div class="mobile-search-icon" style="color:${isDarkMode?'white':'black'};"
+                 onclick="setPageToViewMobile();" title="Jump to Page">
+                <i class="fa-brands fa-page4" style="font-size:28px; cursor:pointer;"></i>
+            </div>
+        </div>
     </div>
 
-    <div class="mobile-menu-item mobile-gif-item">
-        <label for="showPkmnNumberMobile">Pok&#233mon Per Page</label>
-        <input id="showPkmnNumberMobile" name="showPkmnNumberMobile" type="text" placeholder="# of PkMn"/>
-        <i class="fa-regular fa-circle-right" style="font-size:30px; cursor:pointer; color:${isDarkMode?'white':'black'}"
-           onclick="setPkmnPerPageMobile();" title="Show Pok&#233mon">
-        </i>
+    <div class="mobile-menu-item">
+        <div class="mobile-search-box" style="--search-shadow-color:${tileColorParam}; background-color:${isDarkMode?'#1a1a1a':'whitesmoke'};">
+            <input id="showPkmnNumberMobile" name="showPkmnNumberMobile" type="text" placeholder="Pok&#233;mon Per Page"
+                   style="color:${isDarkMode?'white':'black'};"/>
+            <div class="mobile-search-icon" style="color:${isDarkMode?'white':'black'};"
+                 onclick="setPkmnPerPageMobile();" title="Show Pok&#233;mon">
+                <i class="fa-solid fa-list-ol" style="font-size:28px; cursor:pointer;"></i>
+            </div>
+        </div>
     </div>
 
     <div class="mobile-menu-item">

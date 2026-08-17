@@ -102,25 +102,29 @@
                 <input id="search" name="search" type="text" placeholder="Name or ID"/>
                 <div class="search-icon">
                     <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
-                         class="button cursor search-icon" title="Search for Pokemon" style="height:30px;width:30px;"
+                         class="button cursor search-icon" title="Search for Pokemon" style="height:50px;width:50px;"
                          onclick="searchForPkmn(${isDarkMode})">
                 </div>
             </div>
             &emsp;
-            <div id="jumpToPage" style="display:flex;">
-                <label for="pageNumber"></label>
-                <input id="pageNumber" name="pageNumber" type="text" placeholder="Page #" style="width:50px;"/>
-                <i class="fa-regular fa-circle-right" style="font-size:30px; cursor:pointer; color:${isDarkMode?'white':'black'}"
-                   onclick="setPageToView($('#pageNumberMobile').val());" title="Jump to Page">
-                </i>
+            <div id="jumpToPage" class="input-box" style="--input-shadow-color:${tileColorParam};">
+                <input id="pageNumber" name="pageNumber" type="text" placeholder="Page #"
+                       style="color:${isDarkMode?'white':'black'};"
+                       onclick="this.focus();"/>
+                <div class="input-icon" style="color:${isDarkMode?'white':'black'};"
+                     onclick="setPageToView($('#pageNumber').val());" title="Jump to Page">
+                    <i class="fa-brands fa-page4" style="font-size:28px; cursor:pointer;"></i>
+                </div>
             </div>
             &emsp;
-            <div id="showPokemon" style="display:flex;">
-                <label for="showPkmnNumber"></label>
-                <input id="showPkmnNumber" name="showPkmnNumber" type="text" placeholder="# of PkMn" style="width:75px;"/>
-                <i class="fa-regular fa-circle-right" style="font-size:30px; cursor:pointer; color:${isDarkMode?'white':'black'}"
-                   onclick="setPkmnPerPage();" title="Show Pok&#233mon">
-                </i>
+            <div id="showPokemon" class="input-box" style="--input-shadow-color:${tileColorParam};">
+                <input id="showPkmnNumber" name="showPkmnNumber" type="text" placeholder="# of PkMn"
+                       style="color:${isDarkMode?'white':'black'};"
+                       onclick="this.focus();"/>
+                <div class="input-icon" style="color:${isDarkMode?'white':'black'};"
+                     onclick="setPkmnPerPage();" title="Show Pok&#233;mon">
+                    <i class="fa-solid fa-list-ol" style="font-size:28px; cursor:pointer;"></i>
+                </div>
             </div>
             &emsp;
             <button class="back-to-landing-btn icon" onclick="navigateToLandingPage()"

@@ -3,6 +3,14 @@
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml)
 
+# v1.6.3
+This version introduces an update to the navigation section. The inputs have been changed to look just like buttons but
+when you hover over them, they will expand and show the input. When you hover out, the input will collapse back in and
+hide the input field. This was changed for the Search by Name or ID, Jump to Page, and Pokemon Per Page inputs. The color
+you choose from the Landing Page also will be the same color you see on the Go Back to Landing Page button. This color
+is also used to highlight the navigation buttons and are seen in the mobile menu. The mobile menu inputs have also been
+updated. It is now just the input with the icon inside the input to the right. The Landing Page color is also seen here.
+
 # v1.6.2
 This version introduces some fixes along with some new CICD features. The deployment is now handled by GitHub Actions.
 There are two workflows: a deploy workflow and a revert workflow. Deploy changes and wait for the server to come back
