@@ -178,13 +178,13 @@
     .mobile-menu-item button {
         width: 100%;
         padding: 10px;
-        margin-top: 5px;
+        /*margin-top: 5px;*/
         box-sizing: border-box;
     }
     .darkmode .mobile-menu-item input[type="text"] {
         width: 100%;
         padding: 10px;
-        margin-top: 5px;
+        /*margin-top: 5px;*/
         box-sizing: border-box;
         color: white !important;
         background-color: black !important;
@@ -389,7 +389,7 @@
         display: flex;
         align-items: center;
         width: 100%;
-        height: 50px;
+        height: 55px;
         background-color: whitesmoke;
         border-radius: 50px;
         overflow: hidden;
@@ -403,30 +403,75 @@
 
     .search-box input {
         position: absolute;
+        left: 0;
+        top: 0;
         width: 100%;
         height: 100%;
         border: none;
-        padding: 0 70px 0 25px;
-        margin-top: 20px !important;
+        padding: 0 60px 0 20px;
         background-color: var(--search-input-color, black);
         outline: none;
-        justify-content: center;
-        align-items: center;
+        box-sizing: border-box;
+        line-height: 55px;
         z-index: 1;
     }
 
     .search-icon {
         position: absolute;
-        right: 5px;
-        width: 70px;
-        height: 70px;
+        right: 0;
+        top: 0;
+        width: 55px;
+        height: 55px;
         display: flex;
         justify-content: center;
         align-items: center;
-        color: #1a1a1a;
-        font-size: 1.3rem;
-        margin-top: 5px;
         z-index: 2;
+        cursor: pointer;
+    }
+
+    .search-icon img {
+        pointer-events: none;
+    }
+
+    .mobile-search-box {
+        --search-shadow-color: darkred;
+        position: relative;
+        width: 100%;
+        height: 55px;
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: 0 0 20px 4px var(--search-shadow-color);
+        transition: box-shadow 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .mobile-search-box input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        padding: 0 60px 0 20px;
+        background-color: transparent;
+        outline: none;
+        line-height: 55px;
+        box-sizing: border-box;
+    }
+
+    .mobile-search-box input::placeholder {
+        color: #888;
+    }
+
+    .mobile-search-icon {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 55px;
+        height: 55px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         cursor: pointer;
     }
 }
