@@ -58,6 +58,12 @@
     width: 160px;
 }
 
+body.dark-mode #search:focus {
+    color: white;
+    background-color: black;
+    outline: none;
+}
+
 .input-box input,
 .search-box input {
     position: absolute;

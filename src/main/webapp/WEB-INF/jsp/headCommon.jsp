@@ -94,7 +94,14 @@
     }
     .darkmode input {
         color: white !important;
+        -webkit-text-fill-color: white !important;
+        caret-color: white !important;
         background-color: black !important;
+    }
+    .darkmode #search:active {
+        color: white !important;
+        -webkit-text-fill-color: white !important;
+        caret-color: white !important;
     }
     .back-to-landing-btn {
         background-color: #4CAF50;
