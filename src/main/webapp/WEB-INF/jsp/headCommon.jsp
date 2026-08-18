@@ -98,10 +98,20 @@
         caret-color: white !important;
         background-color: black !important;
     }
-    .darkmode #search:active {
-        color: white !important;
+    /* Autofill: browser ignores background-color, only inset box-shadow works */
+    .darkmode input:-webkit-autofill,
+    .darkmode input:-webkit-autofill:hover,
+    .darkmode input:-webkit-autofill:focus,
+    .darkmode input:-webkit-autofill:active {
         -webkit-text-fill-color: white !important;
+        -webkit-box-shadow: 0 0 0 1000px black inset !important;
+        box-shadow: 0 0 0 1000px black inset !important;
         caret-color: white !important;
+        transition: background-color 9999s ease-in-out 0s;
+    }
+    .darkmode .search-box,
+    .darkmode .input-box {
+        background-color: black !important;
     }
     .back-to-landing-btn {
         background-color: #4CAF50;

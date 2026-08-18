@@ -54,7 +54,9 @@
 }
 
 .input-box:hover,
-.search-box:hover {
+.input-box:focus-within,
+.search-box:hover,
+.search-box:focus-within {
     width: 160px;
 }
 
@@ -76,6 +78,13 @@ body.dark-mode #search:focus {
     background-color: transparent;
     outline: none;
     box-sizing: border-box;
+}
+
+body.darkmode .input-box input,
+body.darkmode .search-box input {
+    background-color: black !important;
+    color: white !important;
+    -webkit-text-fill-color: white !important;
 }
 
 .input-box input::placeholder,
