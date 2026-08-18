@@ -48,7 +48,7 @@
 
     body {
         height: 100%;
-        display: block;
+        display: inherit;
         margin: 8px;
         background-position: center center;
         background-repeat: no-repeat;

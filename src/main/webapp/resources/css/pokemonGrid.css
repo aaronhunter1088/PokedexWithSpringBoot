@@ -1,7 +1,7 @@
 .list-grid {
     display: grid;
     grid-gap: 15px;
-    padding: 20px;
+    padding: 20px 0;
     /*grid-template-columns: repeat(auto-fill, minmax(25%, 1fr));*/
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr
 }
