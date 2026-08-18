@@ -48,6 +48,7 @@
 
     body {
         height: 100%;
+        width: fit-content;
         display: inherit;
         margin: 8px;
         background-position: center center;
