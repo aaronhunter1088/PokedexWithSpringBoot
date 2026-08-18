@@ -73,7 +73,7 @@
                     </div>
                     <div id="basicInfo" style="text-align:left;">
                         <h3 id="heightOfPokemon">Height: ${pokemon.heightInInches} in</h3>
-                        <h3 id="weightOfPokemon">Weight: ${pokemon.weightInPounds} lbs</h3>
+                        <h3 id="weightOfPokemon">Weight: ${pokemon.weightInPounds} lb</h3>
                         <h3 id="colorOfPokemon">Color: ${pokemon.capitalizedColor}</h3>
                         <h3 id="typeOfPokemon">Type: ${pokemon.type}</h3>
                     </div>
