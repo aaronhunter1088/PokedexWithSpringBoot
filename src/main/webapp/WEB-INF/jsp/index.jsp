@@ -69,8 +69,8 @@
         <jsp:include page="mobileMenu.jsp"/>
         
         <!-- Desktop Header -->
-        <div id="desktopHeader" style="display:grid;align-items:center;justify-items:center;width:fit-content;max-width:100%;margin:0 auto;">
-            <h1 id="indexSearchImgSearchLink" style="vertical-align:middle;">
+        <div id="desktopHeader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;margin:0 auto;text-align:center;">
+            <h1 id="indexSearchImgSearchLink" style="vertical-align:middle;display:flex;justify-content:center;width:100%;margin:0 auto;">
                 <a href="${pageContext.request.contextPath}/search" style="cursor:zoom-in;" title="Search">
                     <span class="center">
                         <img alt="pokedex" src="${pageContext.request.contextPath}/images/pokedex.png">
@@ -79,25 +79,38 @@
             </h1>
 
             <!-- Desktop Controls -->
-            <div class="desktop-controls" style="display:inline-flex;align-items:center;justify-content:center;row-gap:10px;">
-                <label class="switch" title="If GIF is not present, official artwork will show!">
-                    <input id="gifSwitch" type="checkbox" onclick="toggleGifs();" ${showGifs ? 'checked' : ''}>
-                    <span class="slider round"></span>
-                </label>
-                &nbsp;
-                <label style="margin:10px auto;width:auto;padding-top:0;">
-                    Show GIFs
-                </label>
+            <div class="desktop-controls" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;row-gap:10px;width:100%;margin:0 auto;">
+                <div class="gif-toggle">
+                    <label class="switch" title="If GIF is not present, official artwork will show!">
+                        <input id="gifSwitch"
+                               type="checkbox"
+                               onclick="toggleGifs();"
+                               ${showGifs ? 'checked' : ''}>
+
+                        <span class="slider round"></span>
+                    </label>
+
+                    <label for="gifSwitch">
+                        Show GIFs
+                    </label>
+                </div>
                 &emsp;
-                <label class="switch" title="Toggle darkmode">
-                    <input id="gifSwitchDarkmode" type="checkbox" ${isDarkMode ? 'checked' : ''}
-                           onclick="toggleDarkmode(${!isDarkMode});">
-                    <span class="slider round"></span>
-                </label>
+                <div class="darkmode-toggle">
+                    <label class="switch" title="Toggle darkmode">
+                        <input id="gifSwitchDarkmode"
+                               type="checkbox"
+                               ${isDarkMode ? 'checked' : ''}
+                               onclick="toggleDarkmode(${!isDarkMode});">
+
+                        <span class="slider round"></span>
+                    </label>
+
+                    <label id="switchDarkmodeLabel" for="gifSwitchDarkmode">
+                        ${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}
+                    </label>
+                </div>
                 &nbsp;
-                <label id="switchDarkmodeLabel" style="margin:10px auto;width:auto;padding-top:0;">
-                    ${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}
-                </label>
+
                 &emsp;
                 <div id="searchForPkmn" class="search-box" style="display:flex; --search-shadow-color:${tileColorParam};">
                     <input id="search" name="search" type="text" placeholder="Name or ID"/>
@@ -138,7 +151,7 @@
         <br>
         <jsp:include page="navigation.jsp"/>
 
-        <div id="pokemonGrid" class="list-grid">
+        <div id="pokemonGrid" class="list-grid" style="display:grid;">
             <c:forEach items="${pokemonMap.entrySet()}" var="pokemon">
                 <c:set var="pokemonId" value="${pokemon.value.id}" />
                 <div id="pokemon${pokemonId}">
@@ -278,6 +291,7 @@
 
         function setPkmnPerPage() {
             let value = $("#showPkmnNumber").val();
+            if (value === '') return;
             setPkmnPerPageImpl(value, false);
         }
 
@@ -409,6 +423,11 @@
             let nameOrId = $("#search").val().trim();
             if (nameOrId === '') {
                 nameOrId = $("#searchMobile").val().trim();
+                if (nameOrId === '') {
+                    // if on mobile, rotated screen, you would get alert message just for opening the search.
+                    // simply return to let it open.
+                    return;
+                }
             }
             console.log('nameOrId: ' + nameOrId);
 
@@ -438,8 +457,8 @@
         }
 
         function setPageToView(pageNumber) {
-            let value = $("#pageNumber").val();
-            if (pageNumber !== undefined) value = pageNumber;
+            let value = pageNumber;
+            if (pageNumber === '') return;
             console.log("page to view: " + value);
             $.ajax({
                 type: "GET",

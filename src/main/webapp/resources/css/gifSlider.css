@@ -6,6 +6,21 @@
     margin: 10px auto;
 }
 
+.darkmode-toggle,
+.gif-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.darkmode-toggle > label:last-child,
+.gif-toggle > label:last-child {
+    margin: 0;
+    width: auto;
+    padding: 0;
+    cursor: pointer;
+}
+
 .switch input {
     opacity: 0;
     width: 0;
