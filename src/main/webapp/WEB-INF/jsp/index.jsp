@@ -106,7 +106,7 @@
                     </label>
 
                     <label id="switchDarkmodeLabel" for="gifSwitchDarkmode">
-                        ${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}
+                        ${isDarkMode ? 'Dark Mode' : 'Light Mode'}
                     </label>
                 </div>
                 &emsp;
