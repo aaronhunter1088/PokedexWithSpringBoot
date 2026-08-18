@@ -110,7 +110,7 @@
                     </label>
                 </div>
                 &emsp;
-                <div id="searchForPkmn" class="search-box" style="display:flex; --search-shadow-color:${tileColorParam};">
+                <div id="searchForPkmn" class="search-box" style="display:flex; --input-shadow-color:${tileColorParam};">
                     <input id="search" name="search" type="text" placeholder="Name or ID"/>
                     <div class="search-icon">
                         <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
