@@ -69,83 +69,96 @@
         <jsp:include page="mobileMenu.jsp"/>
         
         <!-- Desktop Header -->
-        <h1 id="indexSearchImgSearchLink" style="vertical-align:middle;">
-            <a href="${pageContext.request.contextPath}/search" style="cursor:zoom-in;" title="Search">
-                <span class="center">
-                <img alt="pokedex" src="${pageContext.request.contextPath}/images/pokedex.png" style="width:100%;"></span>
-            </a>
-        </h1>
-        <br>
+        <div id="desktopHeader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;margin:0 auto;text-align:center;">
+            <h1 id="indexSearchImgSearchLink" style="vertical-align:middle;display:flex;justify-content:center;width:100%;margin:0 auto;">
+                <a href="${pageContext.request.contextPath}/search" style="cursor:zoom-in;" title="Search">
+                    <span class="center">
+                        <img alt="pokedex" src="${pageContext.request.contextPath}/images/pokedex.png">
+                    </span>
+                </a>
+            </h1>
 
-        <!-- Desktop Controls -->
-        <div class="desktop-controls" style="display:inline-flex;align-items:center;">
-            <label class="switch" title="If GIF is not present, official artwork will show!">
-                <input id="gifSwitch" type="checkbox" onclick="toggleGifs();" ${showGifs ? 'checked' : ''}>
-                <span class="slider round"></span>
-            </label>
-            &nbsp;
-            <label style="margin:10px auto;width:auto;padding-top:0;">
-                Show GIFs
-            </label>
-            &emsp;
-            <label class="switch" title="Toggle darkmode">
-                <input id="gifSwitchDarkmode" type="checkbox" ${isDarkMode ? 'checked' : ''}
-                       onclick="toggleDarkmode(${!isDarkMode});">
-                <span class="slider round"></span>
-            </label>
-            &nbsp;
-            <label id="switchDarkmodeLabel" style="margin:10px auto;width:auto;padding-top:0;">
-                ${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}
-            </label>
-            &emsp;
-            <div id="searchForPkmn" class="search-box" style="display:flex; --search-shadow-color:${tileColorParam};">
-                <input id="search" name="search" type="text" placeholder="Name or ID"/>
-                <div class="search-icon">
-                    <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
-                         class="button cursor search-icon" title="Search for Pokemon" style="height:50px;width:50px;"
-                         onclick="searchForPkmn(${isDarkMode})">
+            <!-- Desktop Controls -->
+            <div class="desktop-controls" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;row-gap:10px;width:100%;margin:0 auto;">
+                <div class="gif-toggle">
+                    <label class="switch" title="If GIF is not present, official artwork will show!">
+                        <input id="gifSwitch"
+                               type="checkbox"
+                               onclick="toggleGifs();"
+                               ${showGifs ? 'checked' : ''}>
+
+                        <span class="slider round"></span>
+                    </label>
+
+                    <label for="gifSwitch">
+                        Show GIFs
+                    </label>
                 </div>
-            </div>
-            &emsp;
-            <div id="jumpToPage" class="input-box" style="--input-shadow-color:${tileColorParam};">
-                <input id="pageNumber" name="pageNumber" type="text" placeholder="Page #"
-                       style="color:${isDarkMode?'white':'black'};"
-                       onclick="this.focus();"/>
-                <div class="input-icon" style="color:${isDarkMode?'white':'black'};"
-                     onclick="setPageToView($('#pageNumber').val());" title="Jump to Page">
-                    <i class="fa-brands fa-page4" style="font-size:28px; cursor:pointer;"></i>
+                &emsp;
+                <div class="darkmode-toggle">
+                    <label class="switch" title="Toggle darkmode">
+                        <input id="gifSwitchDarkmode"
+                               type="checkbox"
+                               ${isDarkMode ? 'checked' : ''}
+                               onclick="toggleDarkmode(${!isDarkMode});">
+
+                        <span class="slider round"></span>
+                    </label>
+
+                    <label id="switchDarkmodeLabel" for="gifSwitchDarkmode">
+                        ${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}
+                    </label>
                 </div>
-            </div>
-            &emsp;
-            <div id="showPokemon" class="input-box" style="--input-shadow-color:${tileColorParam};">
-                <input id="showPkmnNumber" name="showPkmnNumber" type="text" placeholder="# of PkMn"
-                       style="color:${isDarkMode?'white':'black'};"
-                       onclick="this.focus();"/>
-                <div class="input-icon" style="color:${isDarkMode?'white':'black'};"
-                     onclick="setPkmnPerPage();" title="Show Pok&#233;mon">
-                    <i class="fa-solid fa-list-ol" style="font-size:28px; cursor:pointer;"></i>
+                &emsp;
+                <div id="searchForPkmn" class="search-box" style="display:flex; --search-shadow-color:${tileColorParam};">
+                    <input id="search" name="search" type="text" placeholder="Name or ID"/>
+                    <div class="search-icon">
+                        <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
+                             class="button cursor search-icon" title="Search for Pokemon" style="height:50px;width:50px;"
+                             onclick="searchForPkmn(${isDarkMode})">
+                    </div>
                 </div>
+                &emsp;
+                <div id="jumpToPage" class="input-box" style="--input-shadow-color:${tileColorParam};">
+                    <input id="pageNumber" name="pageNumber" type="text" placeholder="Page #"
+                           style="color:${isDarkMode?'white':'black'};"
+                           onclick="this.focus();"/>
+                    <div class="input-icon" style="color:${isDarkMode?'white':'black'};"
+                         onclick="setPageToView($('#pageNumber').val());" title="Jump to Page">
+                        <i class="fa-brands fa-page4" style="font-size:28px; cursor:pointer;"></i>
+                    </div>
+                </div>
+                &emsp;
+                <div id="showPokemon" class="input-box" style="--input-shadow-color:${tileColorParam};">
+                    <input id="showPkmnNumber" name="showPkmnNumber" type="text" placeholder="# of PkMn"
+                           style="color:${isDarkMode?'white':'black'};"
+                           onclick="this.focus();"/>
+                    <div class="input-icon" style="color:${isDarkMode?'white':'black'};"
+                         onclick="setPkmnPerPage();" title="Show Pok&#233;mon">
+                        <i class="fa-solid fa-list-ol" style="font-size:28px; cursor:pointer;"></i>
+                    </div>
+                </div>
+                &emsp;
+                <button class="back-to-landing-btn icon" onclick="navigateToLandingPage()"
+                        style="background-color:${tileColorParam};"
+                        title="Return to Landing Page">
+                    Back to Landing Page
+                </button>
             </div>
-            &emsp;
-            <button class="back-to-landing-btn icon" onclick="navigateToLandingPage()"
-                    style="background-color:${tileColorParam};"
-                    title="Return to Landing Page">
-                Back to Landing Page
-            </button>
         </div>
         <br>
         <jsp:include page="navigation.jsp"/>
 
-        <div id="pokemonGrid" class="list-grid">
+        <div id="pokemonGrid" class="list-grid" style="display:grid;">
             <c:forEach items="${pokemonMap.entrySet()}" var="pokemon">
                 <c:set var="pokemonId" value="${pokemon.value.id}" />
                 <div id="pokemon${pokemonId}">
                     <a href="pokedex/${pokemon.value.id}">
                         <div id="pokemon${pokemonId}Box" class="box" title="Click for more info" style="background-color:${pokemon.value.color};">
                             <div id="nameAndId" style="display:inline-flex;">
-                                <h3 id="name" style="color:black;">${pokemon.value.name.substring(0,1).toUpperCase()}${pokemon.value.name.substring(1)}</h3>
+                                <h5 id="name" style="color:black;">${pokemon.value.name.substring(0,1).toUpperCase()}${pokemon.value.name.substring(1)}</h5>
                                 <div style="display: block;">&nbsp;&nbsp;&nbsp;&nbsp;</div>
-                                <h3 id="id" style="color:black;">ID: ${pokemon.value.id}</h3>
+                                <h5 id="id" style="color:black;">ID: ${pokemon.value.id}</h5>
                             </div>
                             <c:set var="defaultImagePresent" value="${pokemonSprites.get(pokemon.value.name)['defaultImagePresent']}" />
                             <c:set var="gifImagePresent" value="${pokemonSprites.get(pokemon.value.name)['gifImagePresent']}" />
@@ -190,7 +203,7 @@
                             </div>
                             <div id="info" style="display:inline-block;">
                                 <h5 id="heightOfPokemon" style="color:black;">Height: ${pokemon.value.heightInInches} in</h5>
-                                <h5 id="weightOfPokemon" style="color:black;">Weight: ${pokemon.value.weightInPounds} lbs</h5>
+                                <h5 id="weightOfPokemon" style="color:black;">Weight: ${pokemon.value.weightInPounds} lb</h5>
                                 <h5 id="colorOfPokemon" style="color:black;">Color: ${pokemon.value.capitalizedColor}</h5>
                                 <h5 id="typeOfPokemon" style="color:black;">Type: ${pokemon.value.type}</h5>
                             </div>
@@ -276,6 +289,7 @@
 
         function setPkmnPerPage() {
             let value = $("#showPkmnNumber").val();
+            if (value === '') return;
             setPkmnPerPageImpl(value, false);
         }
 
@@ -407,6 +421,11 @@
             let nameOrId = $("#search").val().trim();
             if (nameOrId === '') {
                 nameOrId = $("#searchMobile").val().trim();
+                if (nameOrId === '') {
+                    // if on mobile, rotated screen, you would get alert message just for opening the search.
+                    // simply return to let it open.
+                    return;
+                }
             }
             console.log('nameOrId: ' + nameOrId);
 
@@ -436,8 +455,8 @@
         }
 
         function setPageToView(pageNumber) {
-            let value = $("#pageNumber").val();
-            if (pageNumber !== undefined) value = pageNumber;
+            let value = pageNumber;
+            if (pageNumber === '') return;
             console.log("page to view: " + value);
             $.ajax({
                 type: "GET",

@@ -1,7 +1,7 @@
 .list-grid {
     display: grid;
     grid-gap: 15px;
-    padding: 20px;
+    padding: 20px 0;
     /*grid-template-columns: repeat(auto-fill, minmax(25%, 1fr));*/
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr
 }
@@ -10,6 +10,17 @@
     width: 100%;
     height: 400px;
     box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.list-grid .box #image {
+    margin-top: 14px;
+}
+
+.list-grid .box #info h5 {
+    margin: 0 0 8px 0;
+    font-size: 1.15em;
+    line-height: 1.35;
+    font-weight: 400;
 }
 
 /*img {*/
@@ -29,6 +40,7 @@
     cursor: pointer;
 }
 
+.input-box,
 .search-box {
     --search-shadow-color: darkred;
     position: relative;
@@ -40,27 +52,20 @@
     transition: 0.5s;
     box-shadow: 0 0 20px 2px var(--search-shadow-color);
 }
-.search-box:hover {
-    width: 200px;
-}
 
-.input-box {
-    --input-shadow-color: darkred;
-    position: relative;
-    width: 50px;
-    height: 50px;
-    background-color: whitesmoke;
-    border-radius: 50px;
-    overflow: hidden;
-    transition: 0.5s;
-    box-shadow: 0 0 20px 2px var(--input-shadow-color);
-}
-.input-box:hover {
+.input-box:hover,
+.search-box:hover {
     width: 160px;
 }
 
-.search-box input,
-.input-box input {
+body.dark-mode #search:focus {
+    color: white;
+    background-color: black;
+    outline: none;
+}
+
+.input-box input,
+.search-box input {
     position: absolute;
     left: 0;
     top: 0;
@@ -73,13 +78,13 @@
     box-sizing: border-box;
 }
 
-.search-box input::placeholder,
-.input-box input::placeholder {
+.input-box input::placeholder,
+.search-box input::placeholder {
     color: #888;
 }
 
-.search-icon,
-.input-icon {
+.input-icon,
+.search-icon {
     position: absolute;
     right: 0;
     top: 0;
