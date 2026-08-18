@@ -48,7 +48,7 @@
 
     body {
         height: 100%;
-        width: fit-content;
+        width: auto;
         display: inherit;
         margin: 8px;
         background-position: center center;
@@ -57,6 +57,12 @@
         background-size: cover;
         justify-content: space-evenly;
         text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            display: grid;
+        }
     }
 
     .button {
