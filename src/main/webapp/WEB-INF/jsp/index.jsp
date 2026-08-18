@@ -205,7 +205,7 @@
                             </div>
                             <div id="info" style="display:inline-block;">
                                 <h5 id="heightOfPokemon" style="color:black;">Height: ${pokemon.value.heightInInches} in</h5>
-                                <h5 id="weightOfPokemon" style="color:black;">Weight: ${pokemon.value.weightInPounds} lbs</h5>
+                                <h5 id="weightOfPokemon" style="color:black;">Weight: ${pokemon.value.weightInPounds} lb</h5>
                                 <h5 id="colorOfPokemon" style="color:black;">Color: ${pokemon.value.capitalizedColor}</h5>
                                 <h5 id="typeOfPokemon" style="color:black;">Type: ${pokemon.value.type}</h5>
                             </div>
