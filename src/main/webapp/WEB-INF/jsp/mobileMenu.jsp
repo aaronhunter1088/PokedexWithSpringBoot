@@ -31,7 +31,7 @@
     </div>
 
     <div class="mobile-menu-item mobile-gif-item">
-        <label>${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}</label>
+        <label>${isDarkMode ? 'Dark Mode' : 'Light Mode'}</label>
         <label class="switch" title="Toggle darkmode">
             <input id="gifSwitchDarkmode" type="checkbox" ${isDarkMode ? 'checked' : ''}
                    onclick="toggleDarkmode('${isDarkMode}');">
