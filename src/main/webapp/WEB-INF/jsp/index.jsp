@@ -109,8 +109,6 @@
                         ${isDarkMode ? 'Dark Mode On' : 'Light Mode On'}
                     </label>
                 </div>
-                &nbsp;
-
                 &emsp;
                 <div id="searchForPkmn" class="search-box" style="display:flex; --search-shadow-color:${tileColorParam};">
                     <input id="search" name="search" type="text" placeholder="Name or ID"/>
@@ -158,9 +156,9 @@
                     <a href="pokedex/${pokemon.value.id}">
                         <div id="pokemon${pokemonId}Box" class="box" title="Click for more info" style="background-color:${pokemon.value.color};">
                             <div id="nameAndId" style="display:inline-flex;">
-                                <h3 id="name" style="color:black;">${pokemon.value.name.substring(0,1).toUpperCase()}${pokemon.value.name.substring(1)}</h3>
+                                <h5 id="name" style="color:black;">${pokemon.value.name.substring(0,1).toUpperCase()}${pokemon.value.name.substring(1)}</h5>
                                 <div style="display: block;">&nbsp;&nbsp;&nbsp;&nbsp;</div>
-                                <h3 id="id" style="color:black;">ID: ${pokemon.value.id}</h3>
+                                <h5 id="id" style="color:black;">ID: ${pokemon.value.id}</h5>
                             </div>
                             <c:set var="defaultImagePresent" value="${pokemonSprites.get(pokemon.value.name)['defaultImagePresent']}" />
                             <c:set var="gifImagePresent" value="${pokemonSprites.get(pokemon.value.name)['gifImagePresent']}" />
