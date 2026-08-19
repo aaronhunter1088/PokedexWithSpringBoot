@@ -640,11 +640,14 @@
 
         function navigateToLandingPage() {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            let url = '';
-            url = `${env}` !== 'prod' && isMobile
-                ? `http://`+window.location.hostname+`:4200?tileNumber=1&darkmode=${isDarkMode}`
-                : `http://localhost:4200?tileNumber=1&darkmode=${isDarkMode}`;
-            url = `${env}` === 'production' ? `https://mypokedex.us?tileNumber=1&darkmode=${isDarkMode}` : url;
+            const currentDarkMode = document.body.classList.contains("darkmode");
+            let url = "";
+            url = `${env}` !== "prod" && isMobile
+                ? "http://" + window.location.hostname + ":4200?tileNumber=1&darkmode=" + currentDarkMode
+                : "http://localhost:4200?tileNumber=1&darkmode=" + currentDarkMode;
+            url = `${env}` === "production"
+                ? "https://mypokedex.us?tileNumber=1&darkmode=" + currentDarkMode
+                : url;
             window.location.href = url;
         }
 
