@@ -6,6 +6,54 @@
         <title>Pok&#233;dex Spring Boot</title>
         <jsp:include page="headCommon.jsp"/>
         <style>
+            .theme-toggle {
+                    position: relative;
+                    width: 50px;
+                    height: 50px;
+                    cursor: pointer;
+                }
+
+                .theme-toggle img {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+
+                    width: 50px;
+                    height: 50px;
+                    object-fit: contain;
+
+                    transition: opacity 0.5s ease;
+                }
+
+                .theme-toggle .sun {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+
+                .theme-toggle .moon {
+                    opacity: 0;
+                    pointer-events: none;
+                }
+
+                .theme-toggle.dark .sun {
+                    opacity: 0;
+                    pointer-events: none;
+                }
+
+                .theme-toggle.dark .moon {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+
+                .theme-toggle.theme-rotating {
+                    animation: theme-toggle-rotate 0.5s ease;
+                }
+
+                @keyframes theme-toggle-rotate {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(90deg); }
+                }
+
             #loadingOverlay {
                 display: none;
                 position: fixed;
@@ -95,12 +143,13 @@
                     </label>
                 </div>
                 &emsp;
+                <!--
                 <div class="darkmode-toggle">
                     <label class="switch" title="Toggle darkmode">
                         <input id="gifSwitchDarkmode"
                                type="checkbox"
                                ${isDarkMode ? 'checked' : ''}
-                               onclick="toggleDarkmode(${!isDarkMode});">
+                               onclick="toggleDarkmode(!document.body.classList.contains('darkmode'));">
 
                         <span class="slider round"></span>
                     </label>
@@ -108,6 +157,13 @@
                     <label id="switchDarkmodeLabel" for="gifSwitchDarkmode">
                         ${isDarkMode ? 'Dark Mode' : 'Light Mode'}
                     </label>
+                </div>
+                -->
+                <div id="themeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
+                    <img src="images/sun.png" alt="Switch to dark mode" class="sun"
+                         title="Switch to dark mode" onclick="toggleDarkmode(!document.body.classList.contains('darkmode'));">
+                    <img src="images/moon.png" alt="Switch to light mode" class="moon"
+                         title="Switch to light mode" onclick="toggleDarkmode(!document.body.classList.contains('darkmode'));">
                 </div>
                 &emsp;
                 <div id="searchForPkmn" class="search-box" style="display:flex; --input-shadow-color:${tileColorParam};">
@@ -273,6 +329,13 @@
                     setPkmnPerPageMobile();
                 }
             });
+
+            const themeToggle = document.getElementById("themeToggle");
+
+            themeToggle.addEventListener("click", function () {
+                themeToggle.classList.toggle("dark");
+                //toggleDarkmode(${!isDarkMode});
+            });
         });
 
         function clearHomepageQueryParams() {
@@ -349,6 +412,19 @@
 
         function toggleDarkmode(updatedDarkmode) {
             console.log('toggling darkmode: ' + updatedDarkmode);
+            const isDark = updatedDarkmode === true || updatedDarkmode === "true";
+            const themeToggle = document.getElementById("themeToggle");
+            themeToggle.classList.remove("theme-rotating");
+            void themeToggle.offsetWidth;
+            themeToggle.classList.add("theme-rotating");
+            themeToggle.classList.toggle("dark", isDark);
+            const sunIcon = themeToggle.querySelector(".sun");
+            const moonIcon = themeToggle.querySelector(".moon");
+            sunIcon.style.opacity = isDark ? "0" : "1";
+            sunIcon.style.pointerEvents = isDark ? "none" : "auto";
+            moonIcon.style.opacity = isDark ? "1" : "0";
+            moonIcon.style.pointerEvents = isDark ? "auto" : "none";
+
             $.ajax({
                 type: "GET",
                 url: "toggleDarkmode",
@@ -362,14 +438,10 @@
                     200: function(result) {
                         //window.location.reload();
                         console.log('toggleDarkmode: ' + JSON.stringify(result.responseText));
-                        const isDark = result.responseText === 'true';
                         const $body = $('body');
                         $body.toggleClass('dark darkmode', isDark);
                         $body.toggleClass('light lightmode', !isDark);
-                        $("#switchDarkmodeLabel").text(isDark ? 'Dark Mode On' : 'Light Mode On');
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
+                        $("#switchDarkmodeLabel").text(isDark ? 'Dark Mode' : 'Light Mode');
                     },
                     404: function() {
                         console.log('Failed');

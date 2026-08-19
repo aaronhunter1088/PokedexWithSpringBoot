@@ -120,6 +120,14 @@
     .darkmode .input-box {
         background-color: black !important;
     }
+    .darkmode #jumpToPage .input-icon,
+    .darkmode #showPokemon .input-icon {
+        color: white !important;
+    }
+    .lightmode #jumpToPage .input-icon,
+    .lightmode #showPokemon .input-icon {
+        color: black !important;
+    }
     .back-to-landing-btn {
         background-color: #4CAF50;
         color: white;
