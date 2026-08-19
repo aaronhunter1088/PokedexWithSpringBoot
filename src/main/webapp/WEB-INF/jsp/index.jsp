@@ -6,57 +6,55 @@
         <title>Pok&#233;dex Spring Boot</title>
         <jsp:include page="headCommon.jsp"/>
         <style>
-        body {
-            transition:
-                background-color 2s ease,
-                color 2s ease;
-        }
+            body {
+                transition:
+                    background-color 2s ease,
+                    color 2s ease;
+            }
             .theme-toggle {
-                    position: relative;
-                    width: 50px;
-                    height: 50px;
-                    cursor: pointer;
-                    transition: transform 5s ease;
-                }
+                position: relative;
+                width: 50px;
+                height: 50px;
+                cursor: pointer;
+                transition: transform 5s ease;
+            }
 
-                .theme-toggle img {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
+            .theme-toggle img {
+                position: absolute;
+                top: 0;
+                left: 0;
 
-                    width: 50px;
-                    height: 50px;
-                    object-fit: contain;
+                width: 50px;
+                height: 50px;
+                object-fit: contain;
 
-                    transition: transform 5s ease, opacity 2s ease;
-                }
+                transition: transform 5s ease, opacity 2s ease;
+            }
 
-                .theme-toggle .sun {
-                    opacity: 1;
-                    pointer-events: auto;
-                    transform: rotate(180deg) scale(1);
-                }
+            .theme-toggle .sun {
+                opacity: 1;
+                pointer-events: auto;
+                transform: rotate(180deg) scale(1);
+            }
 
-                /* Moon starts hidden and rotated. */
-                .theme-toggle .moon {
-                    opacity: 0;
-                    pointer-events: none;
-                    transform: rotate(180deg) scale(1);
-                }
+            /* Moon starts hidden and rotated. */
+            .theme-toggle .moon {
+                opacity: 0;
+                pointer-events: none;
+                transform: rotate(180deg) scale(1);
+            }
 
-                .theme-toggle.dark .sun {
-                    opacity: 0;
-                    pointer-events: none;
-                    transform: rotate(-180deg) scale(1);
-                }
+            .theme-toggle.dark .sun {
+                opacity: 0;
+                pointer-events: none;
+                transform: rotate(-180deg) scale(1);
+            }
 
-                .theme-toggle.dark .moon {
-                    opacity: 1;
-                    pointer-events: auto;
-                    transform: rotate(180deg) scale(1);
-                }
-
-
+            .theme-toggle.dark .moon {
+                opacity: 1;
+                pointer-events: auto;
+                transform: rotate(180deg) scale(1);
+            }
 
             #loadingOverlay {
                 display: none;
