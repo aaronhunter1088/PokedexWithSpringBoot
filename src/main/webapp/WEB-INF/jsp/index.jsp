@@ -16,7 +16,7 @@
                     width: 50px;
                     height: 50px;
                     cursor: pointer;
-                    transition: transform 0.5s ease;
+                    transition: transform 5s ease;
                 }
 
                 .theme-toggle img {
@@ -28,7 +28,7 @@
                     height: 50px;
                     object-fit: contain;
 
-                    transition: transform 0.5s ease, opacity 0.5s ease;
+                    transition: transform 5s ease, opacity 2s ease;
                 }
 
                 .theme-toggle .sun {
