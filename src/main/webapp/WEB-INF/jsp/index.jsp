@@ -6,6 +6,11 @@
         <title>Pok&#233;dex Spring Boot</title>
         <jsp:include page="headCommon.jsp"/>
         <style>
+        body {
+            transition:
+                background-color 2s ease,
+                color 2s ease;
+        }
             .theme-toggle {
                     position: relative;
                     width: 50px;
@@ -445,12 +450,11 @@
                 crossDomain: true,
                 statusCode: {
                     200: function(result) {
-                        //window.location.reload();
                         console.log('toggleDarkmode: ' + JSON.stringify(result.responseText));
                         const $body = $('body');
                         $body.toggleClass('dark darkmode', isDark);
                         $body.toggleClass('light lightmode', !isDark);
-                        $("#switchDarkmodeLabel").text(isDark ? 'Dark Mode' : 'Light Mode');
+                        //$("#switchDarkmodeLabel").text(isDark ? 'Dark Mode' : 'Light Mode');
                     },
                     404: function() {
                         console.log('Failed');

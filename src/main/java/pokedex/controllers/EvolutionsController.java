@@ -136,19 +136,22 @@ public class EvolutionsController extends BaseController
             LOGGER.info("id:{}", id);
             Pokemon pokemonResponse = pokemonService.getPokemonByIdOrName(String.valueOf(id));
             PokemonSpecies speciesData = null;
-            try {
-                speciesData = pokemonService.getPokemonSpeciesData(String.valueOf(pokemonResponse.getId()));
-                if (null != speciesData) previousId = String.valueOf(id);
-            }
-            catch (Exception e) {
-                LOGGER.warn("No species data found for {}. Using previousId {}", pokemonResponse.getId(), previousId);
+            while (speciesData == null) {
                 try {
-                    speciesData = pokemonService.getPokemonSpeciesData(previousId);
+                    speciesData = pokemonService.getPokemonSpeciesData(String.valueOf(pokemonResponse.getId()));
+                    if (null != speciesData) previousId = String.valueOf(id);
                 }
-                catch (Exception e2) {
-                    LOGGER.error("No species data found using previousId {}", previousId);
+                catch (Exception e) {
+                    LOGGER.warn("No species data found for {}. Using previousId {}", pokemonResponse.getId(), previousId);
+                    try {
+                        speciesData = pokemonService.getPokemonSpeciesData(previousId);
+                    }
+                    catch (Exception e2) {
+                        LOGGER.error("No species data found using previousId {}", previousId);
+                    }
                 }
             }
+
             assert speciesData != null;
             Pokemon pokemon = createPokemon(pokemonResponse, speciesData);
             pokemonList.add(pokemon);
