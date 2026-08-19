@@ -11,6 +11,7 @@
                     width: 50px;
                     height: 50px;
                     cursor: pointer;
+                    transition: transform 0.5s ease;
                 }
 
                 .theme-toggle img {
@@ -22,37 +23,35 @@
                     height: 50px;
                     object-fit: contain;
 
-                    transition: opacity 0.5s ease;
+                    transition: transform 0.5s ease, opacity 0.5s ease;
                 }
 
                 .theme-toggle .sun {
                     opacity: 1;
                     pointer-events: auto;
+                    transform: rotate(180deg) scale(1);
                 }
 
+                /* Moon starts hidden and rotated. */
                 .theme-toggle .moon {
                     opacity: 0;
                     pointer-events: none;
+                    transform: rotate(180deg) scale(1);
                 }
 
                 .theme-toggle.dark .sun {
                     opacity: 0;
                     pointer-events: none;
+                    transform: rotate(-180deg) scale(1);
                 }
 
                 .theme-toggle.dark .moon {
                     opacity: 1;
                     pointer-events: auto;
+                    transform: rotate(180deg) scale(1);
                 }
 
-                .theme-toggle.theme-rotating {
-                    animation: theme-toggle-rotate 0.5s ease;
-                }
 
-                @keyframes theme-toggle-rotate {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(90deg); }
-                }
 
             #loadingOverlay {
                 display: none;
@@ -414,12 +413,22 @@
             console.log('toggling darkmode: ' + updatedDarkmode);
             const isDark = updatedDarkmode === true || updatedDarkmode === "true";
             const themeToggle = document.getElementById("themeToggle");
-            themeToggle.classList.remove("theme-rotating");
-            void themeToggle.offsetWidth;
-            themeToggle.classList.add("theme-rotating");
-            themeToggle.classList.toggle("dark", isDark);
             const sunIcon = themeToggle.querySelector(".sun");
             const moonIcon = themeToggle.querySelector(".moon");
+            const outgoingIcon = isDark ? sunIcon : moonIcon;
+            const incomingIcon = isDark ? moonIcon : sunIcon;
+            const rotation = isDark ? 180 : -180;
+
+            outgoingIcon.animate([
+                { opacity: 1, transform: "rotate(0deg) scale(1)" },
+                { opacity: 0, transform: "rotate(" + rotation + "deg) scale(0.5)" }
+            ], { duration: 500, easing: "ease", fill: "forwards" });
+            incomingIcon.animate([
+                { opacity: 0, transform: "rotate(" + (-rotation) + "deg) scale(0.5)" },
+                { opacity: 1, transform: "rotate(0deg) scale(1)" }
+            ], { duration: 500, easing: "ease", fill: "forwards" });
+
+            themeToggle.classList.toggle("dark", isDark);
             sunIcon.style.opacity = isDark ? "0" : "1";
             sunIcon.style.pointerEvents = isDark ? "none" : "auto";
             moonIcon.style.opacity = isDark ? "1" : "0";
