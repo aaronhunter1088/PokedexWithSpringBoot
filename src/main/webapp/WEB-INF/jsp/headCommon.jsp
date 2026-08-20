@@ -120,6 +120,27 @@
     .darkmode .input-box {
         background-color: black !important;
     }
+    .darkmode #jumpToPage .input-icon,
+    .darkmode #showPokemon .input-icon {
+        color: white !important;
+    }
+    .lightmode #jumpToPage .input-icon,
+    .lightmode #showPokemon .input-icon {
+        color: black !important;
+    }
+    .darkmode .pagination .page-link {
+        background-color: black !important;
+        border-color: #444 !important;
+        color: white !important;
+    }
+    .darkmode .pagination .page-item.disabled .page-link {
+        background-color: #1a1a1a !important;
+        color: #888 !important;
+    }
+    .lightmode .pagination .page-link {
+        background-color: white !important;
+        color: black !important;
+    }
     .back-to-landing-btn {
         background-color: #4CAF50;
         color: white;

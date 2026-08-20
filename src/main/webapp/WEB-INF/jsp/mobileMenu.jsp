@@ -22,21 +22,29 @@
     </button>
 
     <div class="mobile-menu-item mobile-gif-item">
-        <label>Show GIFs</label>
-        <label class="switch" title="If GIF is not present, official artwork will show!">
-            <input id="gifSwitchMobile" type="checkbox" ${showGifs ? 'checked' : ''}
-                   onclick="toggleGifs();">
-            <span class="slider round"></span>
-        </label>
+        <label id="mobileGifToggleLabel">${showGifs ? 'Hide GIFs' : 'Show GIFs'}</label>
+        <div id="showGifsMobile" style="display:flex;align-items:center;justify-content:center;width:50px;height:50px;flex:0 0 50px;position:relative;overflow:hidden;">
+            <img id="gifPreviewToggleMobile"
+                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/25.png"
+                 data-paused-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/25.png"
+                 data-animated-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif"
+                 data-playing="${showGifs ? 'true' : 'false'}"
+                 data-paused-scale="1.95"
+                 alt="pikachu gif preview"
+                 title="If GIF is not present, official artwork will show! Click to toggle GIFs."
+                 style="cursor:pointer;width:50px;height:50px;object-fit:contain;position:absolute;top:50%;left:50%;display:block;"
+                 onclick="handleMobileGifPreviewClick(this);">
+        </div>
     </div>
 
     <div class="mobile-menu-item mobile-gif-item">
-        <label>${isDarkMode ? 'Dark Mode' : 'Light Mode'}</label>
-        <label class="switch" title="Toggle darkmode">
-            <input id="gifSwitchDarkmode" type="checkbox" ${isDarkMode ? 'checked' : ''}
-                   onclick="toggleDarkmode('${isDarkMode}');">
-            <span class="slider round"></span>
-        </label>
+        <label class="mobile-darkmode-label">${isDarkMode ? 'Dark Mode' : 'Light Mode'}</label>
+        <div id="mobileThemeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
+            <img src="images/sun.png" alt="Switch to dark mode" class="sun"
+                 title="Switch to dark mode" onclick="toggleDarkmodeMobile();">
+            <img src="images/moon.png" alt="Switch to light mode" class="moon"
+                 title="Switch to light mode" onclick="toggleDarkmodeMobile();">
+        </div>
     </div>
 
     <div class="mobile-menu-item">
@@ -83,6 +91,9 @@
 </div>
 
 <script>
+    const MOBILE_MENU_CLOSE_DURATION_MS = 2000;
+    let mobileMenuCloseTimeoutId;
+
     $(function(){
         //checks whether the pressed key is "Enter"
         $('#searchMobile').on('keypress', function(e) {
@@ -91,15 +102,22 @@
                 searchForPkmn('${isDarkMode}');
             }
         });
-        $("#gifSwitchMobile").prop("checked", '${showGifs}' === 'true');
+        syncMobileGifPreviewState('${showGifs}' === 'true');
     });
 
     function toggleMobileMenu() {
         const menu = document.getElementById('mobileMenu');
         const overlay = document.getElementById('mobileMenuOverlay');
-        menu.classList.toggle('active');
-        overlay.classList.toggle('active');
-        // Prevent body scroll when menu is open
+        const isOpen = menu.classList.contains('active') && !menu.classList.contains('closing');
+        if (isOpen) {
+            closeMobileMenu();
+            return;
+        }
+        clearTimeout(mobileMenuCloseTimeoutId);
+        menu.classList.remove('closing');
+        overlay.classList.remove('closing');
+        menu.classList.add('active');
+        overlay.classList.add('active');
         if (menu.classList.contains('active')) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -110,9 +128,40 @@
     function closeMobileMenu() {
         const menu = document.getElementById('mobileMenu');
         const overlay = document.getElementById('mobileMenuOverlay');
-        menu.classList.remove('active');
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
+        if (!menu.classList.contains('active')) {
+            document.body.style.overflow = '';
+            return;
+        }
+        clearTimeout(mobileMenuCloseTimeoutId);
+        menu.classList.add('closing');
+        overlay.classList.add('closing');
+        mobileMenuCloseTimeoutId = setTimeout(() => {
+            menu.classList.remove('active', 'closing');
+            overlay.classList.remove('active', 'closing');
+            document.body.style.overflow = '';
+        }, MOBILE_MENU_CLOSE_DURATION_MS);
+    }
+
+    function syncMobileGifPreviewState(showGifsEnabled) {
+        const gifPreviewToggle = document.getElementById("gifPreviewToggleMobile");
+        const gifToggleLabel = document.getElementById("mobileGifToggleLabel");
+        if (!gifPreviewToggle) {
+            return;
+        }
+        gifPreviewToggle.src = showGifsEnabled
+            ? gifPreviewToggle.dataset.animatedSrc
+            : gifPreviewToggle.dataset.pausedSrc;
+        gifPreviewToggle.dataset.playing = showGifsEnabled.toString();
+        gifPreviewToggle.style.transform = showGifsEnabled
+            ? "translate(-50%, -50%) scale(1)"
+            : "translate(-50%, -50%) scale(" + (gifPreviewToggle.dataset.pausedScale || "1") + ")";
+        if (gifToggleLabel) {
+            gifToggleLabel.textContent = showGifsEnabled ? "Hide GIFs" : "Show GIFs";
+        }
+    }
+
+    function handleMobileGifPreviewClick() {
+        toggleGifs();
     }
 
     function toggleGifs() {
@@ -135,33 +184,77 @@
             }
         });
         setTimeout(() => {
-            this.closeMobileMenu();
-        }, 500);
+            closeMobileMenu();
+        }, 1000);
     }
 
-    function toggleDarkmode(updatedDarkmode) {
-        console.log('toggling darkmode: ' + updatedDarkmode);
+    function toggleDarkmodeMobile() {
+        const contextPath = "${pageContext.request.contextPath}";
+        const currentIsDark = document.body.classList.contains("darkmode");
+        const targetIsDark = !currentIsDark;
+        console.log('toggling darkmode, target dark: ' + targetIsDark);
+        const applyToggleState = (toggleElement, isDark) => {
+            if (!toggleElement) {
+                return;
+            }
+            const toggleSunIcon = toggleElement.querySelector(".sun");
+            const toggleMoonIcon = toggleElement.querySelector(".moon");
+            if (!toggleSunIcon || !toggleMoonIcon) {
+                return;
+            }
+            toggleElement.classList.toggle("dark", isDark);
+            toggleSunIcon.style.opacity = isDark ? "0" : "1";
+            toggleSunIcon.style.pointerEvents = isDark ? "none" : "auto";
+            toggleMoonIcon.style.opacity = isDark ? "1" : "0";
+            toggleMoonIcon.style.pointerEvents = isDark ? "auto" : "none";
+        };
+
+        const themeToggle = document.getElementById("mobileThemeToggle");
+        const sunIcon = themeToggle.querySelector(".sun");
+        const moonIcon = themeToggle.querySelector(".moon");
+        const outgoingIcon = targetIsDark ? sunIcon : moonIcon;
+        const incomingIcon = targetIsDark ? moonIcon : sunIcon;
+        const rotation = targetIsDark ? 180 : -180;
+
+        outgoingIcon.animate([
+            { opacity: 1, transform: "rotate(0deg) scale(1)" },
+            { opacity: 0, transform: "rotate(" + rotation + "deg) scale(0.5)" }
+        ], { duration: 500, easing: "ease", fill: "forwards" });
+        incomingIcon.animate([
+            { opacity: 0, transform: "rotate(" + (-rotation) + "deg) scale(0.5)" },
+            { opacity: 1, transform: "rotate(0deg) scale(1)" }
+        ], { duration: 500, easing: "ease", fill: "forwards" });
+
+        applyToggleState(themeToggle, targetIsDark);
+
         $.ajax({
             type: "GET",
-            url: "../toggleDarkmode",
-            data: {
-                darkmode: updatedDarkmode
-            },
+            url: contextPath + "/toggleDarkmode",
             async: false,
-            dataType: "application/json",
+            dataType: "json",
             crossDomain: true,
             statusCode: {
                 200: function(result) {
-                    //window.location.reload();
-                    console.log('toggleDarkmode: ' + JSON.stringify(result.responseText));
-                    const isDark = result.responseText === 'true';
+                    const isDark = result === true || result === "true";
+                    console.log('toggleDarkmode: ' + isDark);
                     const $body = $('body');
                     $body.toggleClass('dark darkmode', isDark);
                     $body.toggleClass('light lightmode', !isDark);
-                    $("#switchDarkmodeLabel").text(isDark ? 'Dark Mode On' : 'Light Mode On');
-                    setTimeout(function() {
-                        location.reload();
-                    }, 500);
+                    if ($("#gifSwitchDarkmode").length) {
+                        $("#gifSwitchDarkmode").prop("checked", isDark);
+                    }
+                    $(".mobile-darkmode-label").text(isDark ? 'Dark Mode' : 'Light Mode');
+                    $(".mobile-header").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
+                    $("#mobileMenu").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
+                    applyToggleState(themeToggle, isDark);
+                    if (typeof syncThemeTogglesWithBody === "function") {
+                        syncThemeTogglesWithBody();
+                    } else {
+                        applyToggleState(document.getElementById("themeToggle"), isDark);
+                    }
+                    setTimeout(() => {
+                        closeMobileMenu();
+                    }, 1000);
                 },
                 404: function() {
                     console.log('Failed');
@@ -181,12 +274,13 @@
             showGifs = data;
         }
         console.log("showGifs: " + showGifs);
-        $("#gifSwitchMobile").prop("checked", showGifs === 'true');
-        if (reload) {
-            setTimeout(function() {
-                location.reload();
-            }, 500);
-        }
+        const showGifsEnabled = showGifs === true || showGifs === 'true';
+        syncMobileGifPreviewState(showGifsEnabled);
+        // if (reload) {
+        //     setTimeout(function() {
+        //         location.reload();
+        //     }, 500);
+        // }
     }
 
     function searchForPkmn() {
@@ -342,11 +436,14 @@
 
     function navigateToLandingPage() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        let url = '';
-        url = `${env}` !== 'prod' && isMobile
-            ? `http://`+window.location.hostname+`:4200?tileNumber=1&darkmode=${isDarkMode}`
-            : `http://localhost:4200?tileNumber=1&darkmode=${isDarkMode}`;
-        url = `${env}` === 'production' ? `https://mypokedex.us?tileNumber=1&darkmode=${isDarkMode}` : url;
+        const currentDarkMode = document.body.classList.contains("darkmode");
+        let url = "";
+        url = `${env}` !== "prod" && isMobile
+            ? "http://" + window.location.hostname + ":4200?tileNumber=1&darkmode=" + currentDarkMode
+            : "http://localhost:4200?tileNumber=1&darkmode=" + currentDarkMode;
+        url = `${env}` === "production"
+            ? "https://mypokedex.us?tileNumber=1&darkmode=" + currentDarkMode
+            : url;
         window.location.href = url;
     }
 

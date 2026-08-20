@@ -6,6 +6,56 @@
         <title>Pok&#233;dex Spring Boot</title>
         <jsp:include page="headCommon.jsp"/>
         <style>
+            body {
+                transition:
+                    background-color 2s ease,
+                    color 2s ease;
+            }
+            .theme-toggle {
+                position: relative;
+                width: 50px;
+                height: 50px;
+                cursor: pointer;
+                transition: transform 5s ease;
+            }
+
+            .theme-toggle img {
+                position: absolute;
+                top: 0;
+                left: 0;
+
+                width: 50px;
+                height: 50px;
+                object-fit: contain;
+
+                transition: transform 5s ease, opacity 2s ease;
+            }
+
+            .theme-toggle .sun {
+                opacity: 1;
+                pointer-events: auto;
+                transform: rotate(180deg) scale(1);
+            }
+
+            /* Moon starts hidden and rotated. */
+            .theme-toggle .moon {
+                opacity: 0;
+                pointer-events: none;
+                transform: rotate(180deg) scale(1);
+            }
+
+            .theme-toggle.dark .sun {
+                opacity: 0;
+                pointer-events: none;
+                transform: rotate(-180deg) scale(1);
+            }
+
+            .theme-toggle.dark .moon {
+                opacity: 1;
+                pointer-events: auto;
+                transform: rotate(180deg) scale(1);
+            }
+
             #loadingOverlay {
                 display: none;
                 position: fixed;
@@ -80,34 +130,24 @@
 
             <!-- Desktop Controls -->
             <div class="desktop-controls" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;row-gap:10px;width:100%;margin:0 auto;">
-                <div class="gif-toggle">
-                    <label class="switch" title="If GIF is not present, official artwork will show!">
-                        <input id="gifSwitch"
-                               type="checkbox"
-                               onclick="toggleGifs();"
-                               ${showGifs ? 'checked' : ''}>
-
-                        <span class="slider round"></span>
-                    </label>
-
-                    <label for="gifSwitch">
-                        Show GIFs
-                    </label>
+                <div id="showGifs" style="display:flex;align-items:center;justify-content:center;width:50px;height:50px;flex:0 0 50px;position:relative;overflow:hidden;">
+                    <img id="gifPreviewToggle"
+                         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/25.png"
+                         data-paused-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/25.png"
+                         data-animated-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif"
+                         data-playing="false"
+                         data-paused-scale="1.95"
+                         alt="pikachu gif preview"
+                         title="If GIF is not present, official artwork will show and if still nothing, a Pokeball."
+                         style="cursor:pointer;width:50px;height:50px;object-fit:contain;position:absolute;top:50%;left:50%;display:block;"
+                         onclick="handleGifPreviewClick();">
                 </div>
                 &emsp;
-                <div class="darkmode-toggle">
-                    <label class="switch" title="Toggle darkmode">
-                        <input id="gifSwitchDarkmode"
-                               type="checkbox"
-                               ${isDarkMode ? 'checked' : ''}
-                               onclick="toggleDarkmode(${!isDarkMode});">
-
-                        <span class="slider round"></span>
-                    </label>
-
-                    <label id="switchDarkmodeLabel" for="gifSwitchDarkmode">
-                        ${isDarkMode ? 'Dark Mode' : 'Light Mode'}
-                    </label>
+                <div id="themeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
+                    <img src="images/sun.png" alt="Switch to dark mode" class="sun"
+                         title="Switch to dark mode" onclick="toggleDarkmode(!document.body.classList.contains('darkmode'));">
+                    <img src="images/moon.png" alt="Switch to light mode" class="moon"
+                         title="Switch to light mode" onclick="toggleDarkmode(!document.body.classList.contains('darkmode'));">
                 </div>
                 &emsp;
                 <div id="searchForPkmn" class="search-box" style="display:flex; --input-shadow-color:${tileColorParam};">
@@ -162,44 +202,61 @@
                             </div>
                             <c:set var="defaultImagePresent" value="${pokemonSprites.get(pokemon.value.name)['defaultImagePresent']}" />
                             <c:set var="gifImagePresent" value="${pokemonSprites.get(pokemon.value.name)['gifImagePresent']}" />
+                            <c:set var="frontImage" value="${pokemonSprites.get(pokemon.value.name)['front']}" />
+                            <c:set var="gifImage" value="${pokemonSprites.get(pokemon.value.name)['gif']}" />
+                            <c:set var="officialImage" value="${pokemonSprites.get(pokemon.value.name)['official']}" />
+                            <c:set var="fallbackImage" value="${pageContext.request.contextPath}/images/pokeball_search.png" />
+                            <c:set var="hoverImage" value="${not empty officialImage ? officialImage : frontImage}" />
+                            <c:set var="initialImageSrc" value="${fallbackImage}" />
+                            <c:choose>
+                                <c:when test="${defaultImagePresent}">
+                                    <c:choose>
+                                        <c:when test="${showGifs and gifImagePresent}">
+                                            <c:set var="initialImageSrc" value="${gifImage}" />
+                                        </c:when>
+                                        <c:when test="${showGifs}">
+                                            <c:choose>
+                                                <c:when test="${not empty officialImage}">
+                                                    <c:set var="initialImageSrc" value="${officialImage}" />
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <c:set var="initialImageSrc" value="${fallbackImage}" />
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:set var="initialImageSrc" value="${frontImage}" />
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:choose>
+                                        <c:when test="${not empty officialImage}">
+                                            <c:set var="initialImageSrc" value="${officialImage}" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:set var="initialImageSrc" value="${fallbackImage}" />
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:otherwise>
+                            </c:choose>
 
                             <div id="image">
-                                <c:choose>
-                                    <c:when test="${defaultImagePresent}">
-                                        <c:choose>
-                                            <c:when test="${showGifs and gifImagePresent}">
-                                                <img src="${pokemonSprites.get(pokemon.value.name)['gif']}" alt="${pokemon.value.name}-gif" style="height:200px;width:200px;">
-                                            </c:when>
-                                            <c:when test="${showGifs}">
-                                                <c:choose>
-                                                    <c:when test="${pokemonSprites.get(pokemon.value.name)['official']}">
-                                                        <img src="${pokemonSprites.get(pokemon.value.name)['official']}" alt="${pokemon.value.name}-official" style="height:200px;width:200px;">
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <img src="${pageContext.request.contextPath}/images/pokeball_search.png" alt="no image found" style="height:200px;width:200px;">
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <img onmouseover="showArtwork(this, '${pokemon.value.officialImage}')"
-                                                     onmouseout="showArtwork(this, '${pokemon.value.defaultImage}');"
-                                                     src="${pokemonSprites.get(pokemon.value.name)['front']}"
-                                                     alt="${pokemon.value.name}-default"
-                                                     style="height:200px;width:200px;">
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:choose>
-                                            <c:when test="${not empty pokemonSprites.get(pokemon.value.name)['official']}">
-                                                <img src="${pokemonSprites.get(pokemon.value.name)['official']}" alt="${pokemon.value.name}-official" style="height:200px;width:200px;">
-                                            </c:when>
-                                            <c:otherwise>
-                                                <img src="${pageContext.request.contextPath}/images/pokeball_search.png" alt="no image found" style="height:200px;width:200px;">
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </c:otherwise>
-                                </c:choose>
+                                <img class="pokemon-grid-image"
+                                     src="${initialImageSrc}"
+                                     data-front-src="${frontImage}"
+                                     data-gif-src="${gifImage}"
+                                     data-official-src="${officialImage}"
+                                     data-fallback-src="${fallbackImage}"
+                                     data-hover-src="${hoverImage}"
+                                     data-default-image-present="${defaultImagePresent}"
+                                     data-gif-image-present="${gifImagePresent}"
+                                     alt="${pokemon.value.name}-image"
+                                     style="height:200px;width:200px;"
+                                     <c:if test="${defaultImagePresent and not showGifs}">
+                                         onmouseover="showArtwork(this, '${hoverImage}')"
+                                         onmouseout="showArtwork(this, '${frontImage}');"
+                                     </c:if>>
                             </div>
                             <div id="info" style="display:inline-block;">
                                 <h5 id="heightOfPokemon" style="color:black;">Height: ${pokemon.value.heightInInches} in</h5>
@@ -220,6 +277,98 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script>
+        function applyThemeToggleState(themeToggle, isDark) {
+            if (!themeToggle) {
+                return;
+            }
+            const sunIcon = themeToggle.querySelector(".sun");
+            const moonIcon = themeToggle.querySelector(".moon");
+            if (!sunIcon || !moonIcon) {
+                return;
+            }
+            themeToggle.classList.toggle("dark", isDark);
+            sunIcon.style.opacity = isDark ? "0" : "1";
+            sunIcon.style.pointerEvents = isDark ? "none" : "auto";
+            moonIcon.style.opacity = isDark ? "1" : "0";
+            moonIcon.style.pointerEvents = isDark ? "auto" : "none";
+        }
+
+        function syncThemeTogglesWithBody() {
+            const isDark = document.body.classList.contains("darkmode");
+            applyThemeToggleState(document.getElementById("themeToggle"), isDark);
+            applyThemeToggleState(document.getElementById("mobileThemeToggle"), isDark);
+            $(".mobile-darkmode-label").text(isDark ? "Dark Mode" : "Light Mode");
+        }
+
+        function toggleGifPlayback(imageElement) {
+            if (!imageElement) {
+                return;
+            }
+            const isPlaying = imageElement.dataset.playing === "true";
+            const nextSrc = isPlaying
+                ? imageElement.dataset.pausedSrc
+                : imageElement.dataset.animatedSrc;
+            imageElement.src = nextSrc;
+            imageElement.dataset.playing = (!isPlaying).toString();
+        }
+
+        function syncGifPreviewState(showGifsEnabled) {
+            const gifPreviewToggle = document.getElementById("gifPreviewToggle");
+            if (!gifPreviewToggle) {
+                return;
+            }
+            gifPreviewToggle.src = showGifsEnabled
+                ? gifPreviewToggle.dataset.animatedSrc
+                : gifPreviewToggle.dataset.pausedSrc;
+            gifPreviewToggle.dataset.playing = showGifsEnabled.toString();
+            gifPreviewToggle.style.transform = showGifsEnabled
+                ? "translate(-50%, -50%) scale(1)"
+                : "translate(-50%, -50%) scale(" + (gifPreviewToggle.dataset.pausedScale || "1") + ")";
+        }
+
+        function applyGifModeToGrid(showGifsEnabled) {
+            document.querySelectorAll(".pokemon-grid-image").forEach(function(imageElement) {
+                const hasDefaultImage = imageElement.dataset.defaultImagePresent === "true";
+                const hasGifImage = imageElement.dataset.gifImagePresent === "true";
+                const frontSrc = imageElement.dataset.frontSrc || "";
+                const gifSrc = imageElement.dataset.gifSrc || "";
+                const officialSrc = imageElement.dataset.officialSrc || "";
+                const fallbackSrc = imageElement.dataset.fallbackSrc || "";
+                const hoverSrc = imageElement.dataset.hoverSrc || frontSrc;
+
+                imageElement.onmouseover = null;
+                imageElement.onmouseout = null;
+
+                if (showGifsEnabled) {
+                    if (hasDefaultImage && hasGifImage && gifSrc) {
+                        imageElement.src = gifSrc;
+                    } else if (officialSrc) {
+                        imageElement.src = officialSrc;
+                    } else {
+                        imageElement.src = fallbackSrc;
+                    }
+                    return;
+                }
+
+                if (hasDefaultImage && frontSrc) {
+                    imageElement.src = frontSrc;
+                    imageElement.onmouseover = function() {
+                        showArtwork(this, hoverSrc);
+                    };
+                    imageElement.onmouseout = function() {
+                        showArtwork(this, frontSrc);
+                    };
+                    return;
+                }
+
+                imageElement.src = officialSrc || fallbackSrc;
+            });
+        }
+
+        function handleGifPreviewClick() {
+            toggleGifs();
+        }
+
         $(function() {
             clearHomepageQueryParams();
             updateGifToggle(false, "${showGifs}");
@@ -273,6 +422,10 @@
                     setPkmnPerPageMobile();
                 }
             });
+
+            syncThemeTogglesWithBody();
+            window.addEventListener("resize", syncThemeTogglesWithBody);
+            window.addEventListener("orientationchange", syncThemeTogglesWithBody);
         });
 
         function clearHomepageQueryParams() {
@@ -332,7 +485,7 @@
                 crossDomain: true,
                 statusCode: {
                     200: function(data) {
-                        updateGifToggle(true, data);
+                        updateGifToggle(data);
                     },
                     404: function() {
                         console.log('Failed');
@@ -343,12 +496,35 @@
                 }
             });
             setTimeout(() => {
-                this.closeMobileMenu();
+                closeMobileMenu();
             }, 500);
         }
 
         function toggleDarkmode(updatedDarkmode) {
             console.log('toggling darkmode: ' + updatedDarkmode);
+            const isDark = updatedDarkmode === true || updatedDarkmode === "true";
+            const themeToggle = document.getElementById("themeToggle");
+            const sunIcon = themeToggle.querySelector(".sun");
+            const moonIcon = themeToggle.querySelector(".moon");
+            const outgoingIcon = isDark ? sunIcon : moonIcon;
+            const incomingIcon = isDark ? moonIcon : sunIcon;
+            const rotation = isDark ? 180 : -180;
+
+            outgoingIcon.animate([
+                { opacity: 1, transform: "rotate(0deg) scale(1)" },
+                { opacity: 0, transform: "rotate(" + rotation + "deg) scale(0.5)" }
+            ], { duration: 500, easing: "ease", fill: "forwards" });
+            incomingIcon.animate([
+                { opacity: 0, transform: "rotate(" + (-rotation) + "deg) scale(0.5)" },
+                { opacity: 1, transform: "rotate(0deg) scale(1)" }
+            ], { duration: 500, easing: "ease", fill: "forwards" });
+
+            themeToggle.classList.toggle("dark", isDark);
+            sunIcon.style.opacity = isDark ? "0" : "1";
+            sunIcon.style.pointerEvents = isDark ? "none" : "auto";
+            moonIcon.style.opacity = isDark ? "1" : "0";
+            moonIcon.style.pointerEvents = isDark ? "auto" : "none";
+
             $.ajax({
                 type: "GET",
                 url: "toggleDarkmode",
@@ -360,16 +536,11 @@
                 crossDomain: true,
                 statusCode: {
                     200: function(result) {
-                        //window.location.reload();
                         console.log('toggleDarkmode: ' + JSON.stringify(result.responseText));
-                        const isDark = result.responseText === 'true';
                         const $body = $('body');
                         $body.toggleClass('dark darkmode', isDark);
                         $body.toggleClass('light lightmode', !isDark);
-                        $("#switchDarkmodeLabel").text(isDark ? 'Dark Mode On' : 'Light Mode On');
-                        setTimeout(function() {
-                            location.reload();
-                        }, 500);
+                        syncThemeTogglesWithBody();
                     },
                     404: function() {
                         console.log('Failed');
@@ -381,21 +552,22 @@
             });
         }
 
-        function updateGifToggle(reload, data) {
+        function updateGifToggle(data) {
             let showGifs;
             try {
                 showGifs = JSON.parse(data.responseText);
             } catch (error) {
                 showGifs = data;
             }
-            console.log("showGifs: " + showGifs);
-            $("#gifSwitch").attr("checked", showGifs === 'true');
-            $("#gifSwitchMobile").attr("checked", showGifs === 'true');
-            if (reload) {
-                setTimeout(function() {
-                    location.reload();
-                }, 500);
+            const showGifsEnabled = showGifs === true || showGifs === "true";
+            console.log("showGifs: " + showGifsEnabled);
+            $("#gifSwitch").prop("checked", showGifsEnabled);
+            $("#gifSwitchMobile").prop("checked", showGifsEnabled);
+            syncGifPreviewState(showGifsEnabled);
+            if (typeof syncMobileGifPreviewState === "function") {
+                syncMobileGifPreviewState(showGifsEnabled);
             }
+            applyGifModeToGrid(showGifsEnabled);
         }
 
         function changeColor(pokemonColor) {
@@ -555,11 +727,14 @@
 
         function navigateToLandingPage() {
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            let url = '';
-            url = `${env}` !== 'prod' && isMobile
-                ? `http://`+window.location.hostname+`:4200?tileNumber=1&darkmode=${isDarkMode}`
-                : `http://localhost:4200?tileNumber=1&darkmode=${isDarkMode}`;
-            url = `${env}` === 'production' ? `https://mypokedex.us?tileNumber=1&darkmode=${isDarkMode}` : url;
+            const currentDarkMode = document.body.classList.contains("darkmode");
+            let url = "";
+            url = `${env}` !== "prod" && isMobile
+                ? "http://" + window.location.hostname + ":4200?tileNumber=1&darkmode=" + currentDarkMode
+                : "http://localhost:4200?tileNumber=1&darkmode=" + currentDarkMode;
+            url = `${env}` === "production"
+                ? "https://mypokedex.us?tileNumber=1&darkmode=" + currentDarkMode
+                : url;
             window.location.href = url;
         }
 
