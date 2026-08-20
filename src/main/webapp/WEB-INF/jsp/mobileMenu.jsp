@@ -22,12 +22,19 @@
     </button>
 
     <div class="mobile-menu-item mobile-gif-item">
-        <label>Show GIFs</label>
-        <label class="switch" title="If GIF is not present, official artwork will show!">
-            <input id="gifSwitchMobile" type="checkbox" ${showGifs ? 'checked' : ''}
-                   onclick="toggleGifs();">
-            <span class="slider round"></span>
-        </label>
+        <label id="mobileGifToggleLabel">${showGifs ? 'Hide GIFs' : 'Show GIFs'}</label>
+        <div id="showGifsMobile" style="display:flex;align-items:center;justify-content:center;width:50px;height:50px;flex:0 0 50px;position:relative;overflow:hidden;">
+            <img id="gifPreviewToggleMobile"
+                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/25.png"
+                 data-paused-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/25.png"
+                 data-animated-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif"
+                 data-playing="${showGifs ? 'true' : 'false'}"
+                 data-paused-scale="1.95"
+                 alt="pikachu gif preview"
+                 title="If GIF is not present, official artwork will show! Click to toggle GIFs."
+                 style="cursor:pointer;width:50px;height:50px;object-fit:contain;position:absolute;top:50%;left:50%;display:block;"
+                 onclick="handleMobileGifPreviewClick(this);">
+        </div>
     </div>
 
     <div class="mobile-menu-item mobile-gif-item">
@@ -95,7 +102,7 @@
                 searchForPkmn('${isDarkMode}');
             }
         });
-        $("#gifSwitchMobile").prop("checked", '${showGifs}' === 'true');
+        syncMobileGifPreviewState('${showGifs}' === 'true');
     });
 
     function toggleMobileMenu() {
@@ -133,6 +140,28 @@
             overlay.classList.remove('active', 'closing');
             document.body.style.overflow = '';
         }, MOBILE_MENU_CLOSE_DURATION_MS);
+    }
+
+    function syncMobileGifPreviewState(showGifsEnabled) {
+        const gifPreviewToggle = document.getElementById("gifPreviewToggleMobile");
+        const gifToggleLabel = document.getElementById("mobileGifToggleLabel");
+        if (!gifPreviewToggle) {
+            return;
+        }
+        gifPreviewToggle.src = showGifsEnabled
+            ? gifPreviewToggle.dataset.animatedSrc
+            : gifPreviewToggle.dataset.pausedSrc;
+        gifPreviewToggle.dataset.playing = showGifsEnabled.toString();
+        gifPreviewToggle.style.transform = showGifsEnabled
+            ? "translate(-50%, -50%) scale(1)"
+            : "translate(-50%, -50%) scale(" + (gifPreviewToggle.dataset.pausedScale || "1") + ")";
+        if (gifToggleLabel) {
+            gifToggleLabel.textContent = showGifsEnabled ? "Hide GIFs" : "Show GIFs";
+        }
+    }
+
+    function handleMobileGifPreviewClick() {
+        toggleGifs();
     }
 
     function toggleGifs() {
@@ -245,7 +274,8 @@
             showGifs = data;
         }
         console.log("showGifs: " + showGifs);
-        $("#gifSwitchMobile").prop("checked", showGifs === 'true');
+        const showGifsEnabled = showGifs === true || showGifs === 'true';
+        syncMobileGifPreviewState(showGifsEnabled);
         // if (reload) {
         //     setTimeout(function() {
         //         location.reload();
