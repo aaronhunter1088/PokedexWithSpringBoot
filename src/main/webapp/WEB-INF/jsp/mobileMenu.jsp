@@ -31,12 +31,13 @@
     </div>
 
     <div class="mobile-menu-item mobile-gif-item">
-        <label>${isDarkMode ? 'Dark Mode' : 'Light Mode'}</label>
-        <label class="switch" title="Toggle darkmode">
-            <input id="gifSwitchDarkmode" type="checkbox" ${isDarkMode ? 'checked' : ''}
-                   onclick="toggleDarkmode('${isDarkMode}');">
-            <span class="slider round"></span>
-        </label>
+        <label class="mobile-darkmode-label">${isDarkMode ? 'Dark Mode' : 'Light Mode'}</label>
+        <div id="mobileThemeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
+            <img src="images/sun.png" alt="Switch to dark mode" class="sun"
+                 title="Switch to dark mode" onclick="toggleDarkmodeMobile();">
+            <img src="images/moon.png" alt="Switch to light mode" class="moon"
+                 title="Switch to light mode" onclick="toggleDarkmodeMobile();">
+        </div>
     </div>
 
     <div class="mobile-menu-item">
@@ -83,6 +84,9 @@
 </div>
 
 <script>
+    const MOBILE_MENU_CLOSE_DURATION_MS = 2000;
+    let mobileMenuCloseTimeoutId;
+
     $(function(){
         //checks whether the pressed key is "Enter"
         $('#searchMobile').on('keypress', function(e) {
@@ -97,9 +101,16 @@
     function toggleMobileMenu() {
         const menu = document.getElementById('mobileMenu');
         const overlay = document.getElementById('mobileMenuOverlay');
-        menu.classList.toggle('active');
-        overlay.classList.toggle('active');
-        // Prevent body scroll when menu is open
+        const isOpen = menu.classList.contains('active') && !menu.classList.contains('closing');
+        if (isOpen) {
+            closeMobileMenu();
+            return;
+        }
+        clearTimeout(mobileMenuCloseTimeoutId);
+        menu.classList.remove('closing');
+        overlay.classList.remove('closing');
+        menu.classList.add('active');
+        overlay.classList.add('active');
         if (menu.classList.contains('active')) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -110,9 +121,18 @@
     function closeMobileMenu() {
         const menu = document.getElementById('mobileMenu');
         const overlay = document.getElementById('mobileMenuOverlay');
-        menu.classList.remove('active');
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
+        if (!menu.classList.contains('active')) {
+            document.body.style.overflow = '';
+            return;
+        }
+        clearTimeout(mobileMenuCloseTimeoutId);
+        menu.classList.add('closing');
+        overlay.classList.add('closing');
+        mobileMenuCloseTimeoutId = setTimeout(() => {
+            menu.classList.remove('active', 'closing');
+            overlay.classList.remove('active', 'closing');
+            document.body.style.overflow = '';
+        }, MOBILE_MENU_CLOSE_DURATION_MS);
     }
 
     function toggleGifs() {
@@ -135,33 +155,64 @@
             }
         });
         setTimeout(() => {
-            this.closeMobileMenu();
-        }, 500);
+            closeMobileMenu();
+        }, 1000);
     }
 
-    function toggleDarkmode(updatedDarkmode) {
-        console.log('toggling darkmode: ' + updatedDarkmode);
+    function toggleDarkmodeMobile() {
+        const contextPath = "${pageContext.request.contextPath}";
+        const currentIsDark = document.body.classList.contains("darkmode");
+        const targetIsDark = !currentIsDark;
+        console.log('toggling darkmode, target dark: ' + targetIsDark);
+        const themeToggle = document.getElementById("mobileThemeToggle");
+        const sunIcon = themeToggle.querySelector(".sun");
+        const moonIcon = themeToggle.querySelector(".moon");
+        const outgoingIcon = targetIsDark ? sunIcon : moonIcon;
+        const incomingIcon = targetIsDark ? moonIcon : sunIcon;
+        const rotation = targetIsDark ? 180 : -180;
+
+        outgoingIcon.animate([
+            { opacity: 1, transform: "rotate(0deg) scale(1)" },
+            { opacity: 0, transform: "rotate(" + rotation + "deg) scale(0.5)" }
+        ], { duration: 500, easing: "ease", fill: "forwards" });
+        incomingIcon.animate([
+            { opacity: 0, transform: "rotate(" + (-rotation) + "deg) scale(0.5)" },
+            { opacity: 1, transform: "rotate(0deg) scale(1)" }
+        ], { duration: 500, easing: "ease", fill: "forwards" });
+
+        themeToggle.classList.toggle("dark", targetIsDark);
+        sunIcon.style.opacity = targetIsDark ? "0" : "1";
+        sunIcon.style.pointerEvents = targetIsDark ? "none" : "auto";
+        moonIcon.style.opacity = targetIsDark ? "1" : "0";
+        moonIcon.style.pointerEvents = targetIsDark ? "auto" : "none";
+
         $.ajax({
             type: "GET",
-            url: "../toggleDarkmode",
-            data: {
-                darkmode: updatedDarkmode
-            },
+            url: contextPath + "/toggleDarkmode",
             async: false,
-            dataType: "application/json",
+            dataType: "json",
             crossDomain: true,
             statusCode: {
                 200: function(result) {
-                    //window.location.reload();
-                    console.log('toggleDarkmode: ' + JSON.stringify(result.responseText));
-                    const isDark = result.responseText === 'true';
+                    const isDark = result === true || result === "true";
+                    console.log('toggleDarkmode: ' + isDark);
                     const $body = $('body');
                     $body.toggleClass('dark darkmode', isDark);
                     $body.toggleClass('light lightmode', !isDark);
-                    $("#switchDarkmodeLabel").text(isDark ? 'Dark Mode On' : 'Light Mode On');
-                    setTimeout(function() {
-                        location.reload();
-                    }, 500);
+                    if ($("#gifSwitchDarkmode").length) {
+                        $("#gifSwitchDarkmode").prop("checked", isDark);
+                    }
+                    $(".mobile-darkmode-label").text(isDark ? 'Dark Mode' : 'Light Mode');
+                    $(".mobile-header").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
+                    $("#mobileMenu").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
+                    themeToggle.classList.toggle("dark", isDark);
+                    sunIcon.style.opacity = isDark ? "0" : "1";
+                    sunIcon.style.pointerEvents = isDark ? "none" : "auto";
+                    moonIcon.style.opacity = isDark ? "1" : "0";
+                    moonIcon.style.pointerEvents = isDark ? "auto" : "none";
+                    setTimeout(() => {
+                        closeMobileMenu();
+                    }, 1000);
                 },
                 404: function() {
                     console.log('Failed');
@@ -182,11 +233,11 @@
         }
         console.log("showGifs: " + showGifs);
         $("#gifSwitchMobile").prop("checked", showGifs === 'true');
-        if (reload) {
-            setTimeout(function() {
-                location.reload();
-            }, 500);
-        }
+        // if (reload) {
+        //     setTimeout(function() {
+        //         location.reload();
+        //     }, 500);
+        // }
     }
 
     function searchForPkmn() {

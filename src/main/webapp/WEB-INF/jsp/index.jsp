@@ -145,22 +145,6 @@
                     </label>
                 </div>
                 &emsp;
-                <!--
-                <div class="darkmode-toggle">
-                    <label class="switch" title="Toggle darkmode">
-                        <input id="gifSwitchDarkmode"
-                               type="checkbox"
-                               ${isDarkMode ? 'checked' : ''}
-                               onclick="toggleDarkmode(!document.body.classList.contains('darkmode'));">
-
-                        <span class="slider round"></span>
-                    </label>
-
-                    <label id="switchDarkmodeLabel" for="gifSwitchDarkmode">
-                        ${isDarkMode ? 'Dark Mode' : 'Light Mode'}
-                    </label>
-                </div>
-                -->
                 <div id="themeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
                     <img src="images/sun.png" alt="Switch to dark mode" class="sun"
                          title="Switch to dark mode" onclick="toggleDarkmode(!document.body.classList.contains('darkmode'));">
