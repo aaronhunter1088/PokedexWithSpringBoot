@@ -164,6 +164,22 @@
         const currentIsDark = document.body.classList.contains("darkmode");
         const targetIsDark = !currentIsDark;
         console.log('toggling darkmode, target dark: ' + targetIsDark);
+        const applyToggleState = (toggleElement, isDark) => {
+            if (!toggleElement) {
+                return;
+            }
+            const toggleSunIcon = toggleElement.querySelector(".sun");
+            const toggleMoonIcon = toggleElement.querySelector(".moon");
+            if (!toggleSunIcon || !toggleMoonIcon) {
+                return;
+            }
+            toggleElement.classList.toggle("dark", isDark);
+            toggleSunIcon.style.opacity = isDark ? "0" : "1";
+            toggleSunIcon.style.pointerEvents = isDark ? "none" : "auto";
+            toggleMoonIcon.style.opacity = isDark ? "1" : "0";
+            toggleMoonIcon.style.pointerEvents = isDark ? "auto" : "none";
+        };
+
         const themeToggle = document.getElementById("mobileThemeToggle");
         const sunIcon = themeToggle.querySelector(".sun");
         const moonIcon = themeToggle.querySelector(".moon");
@@ -180,11 +196,7 @@
             { opacity: 1, transform: "rotate(0deg) scale(1)" }
         ], { duration: 500, easing: "ease", fill: "forwards" });
 
-        themeToggle.classList.toggle("dark", targetIsDark);
-        sunIcon.style.opacity = targetIsDark ? "0" : "1";
-        sunIcon.style.pointerEvents = targetIsDark ? "none" : "auto";
-        moonIcon.style.opacity = targetIsDark ? "1" : "0";
-        moonIcon.style.pointerEvents = targetIsDark ? "auto" : "none";
+        applyToggleState(themeToggle, targetIsDark);
 
         $.ajax({
             type: "GET",
@@ -205,11 +217,12 @@
                     $(".mobile-darkmode-label").text(isDark ? 'Dark Mode' : 'Light Mode');
                     $(".mobile-header").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
                     $("#mobileMenu").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
-                    themeToggle.classList.toggle("dark", isDark);
-                    sunIcon.style.opacity = isDark ? "0" : "1";
-                    sunIcon.style.pointerEvents = isDark ? "none" : "auto";
-                    moonIcon.style.opacity = isDark ? "1" : "0";
-                    moonIcon.style.pointerEvents = isDark ? "auto" : "none";
+                    applyToggleState(themeToggle, isDark);
+                    if (typeof syncThemeTogglesWithBody === "function") {
+                        syncThemeTogglesWithBody();
+                    } else {
+                        applyToggleState(document.getElementById("themeToggle"), isDark);
+                    }
                     setTimeout(() => {
                         closeMobileMenu();
                     }, 1000);

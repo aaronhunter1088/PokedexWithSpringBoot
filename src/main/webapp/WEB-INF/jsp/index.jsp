@@ -262,6 +262,29 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script>
+        function applyThemeToggleState(themeToggle, isDark) {
+            if (!themeToggle) {
+                return;
+            }
+            const sunIcon = themeToggle.querySelector(".sun");
+            const moonIcon = themeToggle.querySelector(".moon");
+            if (!sunIcon || !moonIcon) {
+                return;
+            }
+            themeToggle.classList.toggle("dark", isDark);
+            sunIcon.style.opacity = isDark ? "0" : "1";
+            sunIcon.style.pointerEvents = isDark ? "none" : "auto";
+            moonIcon.style.opacity = isDark ? "1" : "0";
+            moonIcon.style.pointerEvents = isDark ? "auto" : "none";
+        }
+
+        function syncThemeTogglesWithBody() {
+            const isDark = document.body.classList.contains("darkmode");
+            applyThemeToggleState(document.getElementById("themeToggle"), isDark);
+            applyThemeToggleState(document.getElementById("mobileThemeToggle"), isDark);
+            $(".mobile-darkmode-label").text(isDark ? "Dark Mode" : "Light Mode");
+        }
+
         $(function() {
             clearHomepageQueryParams();
             updateGifToggle(false, "${showGifs}");
@@ -315,13 +338,9 @@
                     setPkmnPerPageMobile();
                 }
             });
-
-            const themeToggle = document.getElementById("themeToggle");
-
-            themeToggle.addEventListener("click", function () {
-                themeToggle.classList.toggle("dark");
-                //toggleDarkmode(${!isDarkMode});
-            });
+            syncThemeTogglesWithBody();
+            window.addEventListener("resize", syncThemeTogglesWithBody);
+            window.addEventListener("orientationchange", syncThemeTogglesWithBody);
         });
 
         function clearHomepageQueryParams() {
@@ -436,7 +455,7 @@
                         const $body = $('body');
                         $body.toggleClass('dark darkmode', isDark);
                         $body.toggleClass('light lightmode', !isDark);
-                        //$("#switchDarkmodeLabel").text(isDark ? 'Dark Mode' : 'Light Mode');
+                        syncThemeTogglesWithBody();
                     },
                     404: function() {
                         console.log('Failed');
