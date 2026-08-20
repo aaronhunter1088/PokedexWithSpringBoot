@@ -100,8 +100,8 @@ jobs:
                     /opt/tomcat11/MyPokedex/springboot.war
 
             # Update Ownership
-            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/*
-            #sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/*
+            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/
+            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/*
             sudo chmod 755 /opt/tomcat11/MyPokedex/springboot.war
 
             # Start Tomcat 11 Service
