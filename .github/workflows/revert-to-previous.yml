@@ -50,7 +50,7 @@ jobs:
 
             # Update Permissions Again
             sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/springboot
-            sudo chmod -R 644 /opt/tomcat11/MyPokedex/springboot.war
+            sudo chmod -R 644 /opt/tomcat11/MyPokedex/springboot
 
             # Start Tomcat 11 Service
             sudo systemctl start tomcat11
