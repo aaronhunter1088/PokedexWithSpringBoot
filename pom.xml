@@ -10,22 +10,20 @@
     </parent>
 
     <artifactId>Pokedex</artifactId>
-    <version>1.6.3</version>
+    <version>1.6.4</version>
     <packaging>war</packaging>
     <name>Pokédex</name>
     <description>Springboot Pokédex App</description>
 
     <properties>
         <finalName>${project.artifactId}-${project.version}</finalName>
-        <outputDirectory>${basedir}/dist/${project.version}</outputDirectory>
+        <outputDirectory>${project.basedir}/dist/${project.version}</outputDirectory>
         <main.class>pokedex.PokedexApplication</main.class>
-        <springdoc.openapi.swagger-ui>http://localhost:4201/springboot/swagger-ui/index.html</springdoc.openapi.swagger-ui>
-        <springdoc.openapi.url>http://localhost:4201/springboot/v3/api-docs</springdoc.openapi.url>
 
         <jakarta.servlet.jstl.version>3.0.1</jakarta.servlet.jstl.version>
         <jakarta.servlet.jstl-api.version>3.0.2</jakarta.servlet.jstl-api.version>
         <jakarta.ws.rs-api.version>4.0.0</jakarta.ws.rs-api.version>
-        <pokedexapi.version>1.6.3</pokedexapi.version>
+        <pokedexapi.version>1.6.4</pokedexapi.version>
         <!-- Used to test new versions --><!--
         <spring.boot.version>4.1.0</spring.boot.version> -->
         <taglibs.standard.version>1.2.5</taglibs.standard.version>

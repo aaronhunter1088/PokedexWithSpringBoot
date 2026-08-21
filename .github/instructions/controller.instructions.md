@@ -9,7 +9,7 @@ Apply these instructions when adding or editing controller classes in the projec
 - Use a private static logger via `LogManager.getLogger(...)` in each controller.
 - Keep controller methods small and endpoint-focused; delegate enrichment and mapping work to `BaseController` helpers like `createPokemon(...)`, `retrievePokemon(...)`, and `setupPokedex(...)`.
 - Preserve the existing endpoint layout and response style:
-  - `PokemonListController`: `/`, `/page`, `/pkmnPerPage`, `/getPokemonByType`, `/toggleGifs`, `/toggleDarkmode`
+  - `IndexController`: `/`, `/page`, `/pkmnPerPage`, `/getPokemonByType`, `/toggleGifs`, `/toggleDarkmode`
   - `PokedexController`: `/pokedex/{nameOrId}`
   - `EvolutionsController`: `/evolutions/{pokemonId}`
   - `EvolvesHowController`: `pokemonId` request parameter and `evolves-how` fragment rendering

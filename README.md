@@ -3,6 +3,13 @@
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml)
 
+# v.1.6.4
+This version fixes a bug where the PokeApi client was not returning the data right away. Since we only attempted to call
+the client once, nothing was returned. At first, this was yielding a 500 error because we attempted to access data on
+a null reference. Later, we updated the code to allow the homepage to load without any data shown. Now, we placed the
+call to the client in a while loop. This will continue until the data is returned, allowing the homepage to load with
+the Pokemon on the screen, without requiring the user to refresh the page. 
+
 # v1.6.3
 This version introduces an update to the navigation section. The inputs have been changed to look just like buttons but
 when you hover over them, they will expand and show the input. When you hover out, the input will collapse back in and
@@ -10,6 +17,7 @@ hide the input field. This was changed for the Search by Name or ID, Jump to Pag
 you choose from the Landing Page also will be the same color you see on the Go Back to Landing Page button. This color
 is also used to highlight the navigation buttons and are seen in the mobile menu. The mobile menu inputs have also been
 updated. It is now just the input with the icon inside the input to the right. The Landing Page color is also seen here.
+The show gifs and toggle darkmode have also been updated to be a lot more interactive and fun.
 
 # v1.6.2
 This version introduces some fixes along with some new CICD features. The deployment is now handled by GitHub Actions.

@@ -44,6 +44,7 @@ public class BaseController
     protected int page = 1;
     protected int lastPageSearched = 1;
     protected int pkmnPerPage = 10;
+    protected NamedApiResourceList<Pokemon> pokemonList;
     Map<Integer, Pokemon> pokemonMap = new TreeMap<>();
     Map<String, List<Pokemon>> filteredPokemonByType = new ConcurrentHashMap<>();
     Map<String, Boolean> filteringInProgress = new ConcurrentHashMap<>();
@@ -234,25 +235,14 @@ public class BaseController
     {
         LOGGER.info("page number: {}", page);
         LOGGER.info("pkmnPerPage: {}", pkmnPerPage);
-        NamedApiResourceList<Pokemon> pokemonList = pokemonService.getAllPokemons(pkmnPerPage, ((page - 1) * pkmnPerPage));
-        if (null != pokemonList && !pokemonList.results().isEmpty()) {
+        pokemonList = pokemonService.getAllPokemons(pkmnPerPage, ((page - 1) * pkmnPerPage));
+        if (!pokemonList.results().isEmpty()) {
+            pokemonMap.clear(); // don't want previous result to stay...
             LOGGER.debug("pokemonList size: {}", pokemonList.results().size());
             List<NamedApiResource<Pokemon>> listOfPokemon = pokemonList.results();
             LOGGER.debug("pokemonList limit size: {}", listOfPokemon.size());
-            //totalPokemon = pokemonService.getTotalPokemon(null);
+
             totalPokemon = pokemonList.count();
-//            try {
-//                HttpResponse<String> response = pokemonService.callUrl(pokeApiBaseUrl+"pokedex/1");
-//                if (response.statusCode() == 200) {
-//                    totalPokemon = Integer.parseInt(response.body());
-//                    LOGGER.info("Resetting total to {}", totalPokemon);
-//                } else {
-//                    LOGGER.warn("Pokedex call failed");
-//                }
-//            }
-//            catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
             listOfPokemon.forEach(pkmn -> {
                 Pokemon pokemon = pokemonService.getPokemonByIdOrName(pkmn.name());
                 if (pokemon == null) {
@@ -291,7 +281,8 @@ public class BaseController
         }
         if (pokemonMap.size() >= pkmnPerPage) {
             return pokemonMap;
-        } else {
+        }
+        else {
             this.page = this.page + 1;
             LOGGER.info("pokemonMap size: {}", pokemonMap.size());
             return getPokemonMap();
