@@ -729,7 +729,7 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const currentDarkMode = document.body.classList.contains("darkmode");
             let url = "";
-            url = `${env}` !== "prod" && isMobile
+            url = `${env}` !== "production" && isMobile
                 ? "http://" + window.location.hostname + ":4200?tileNumber=1&darkmode=" + currentDarkMode
                 : "http://localhost:4200?tileNumber=1&darkmode=" + currentDarkMode;
             url = `${env}` === "production"
