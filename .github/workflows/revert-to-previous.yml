@@ -38,23 +38,22 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            # Stop script on a failing command rather than blindly continuing
+            set -e
+
             # Stop Tomcat 11 Service
             sudo systemctl stop tomcat11
 
             # Revert to Previous Working Version
-            cd /opt/tomcat11
-            sudo rm -rf MyPokedex/springboot
-            sudo rm -rf MyPokedex/springboot.war
-            sudo mkdir MyPokedex/springboot
-            sudo cp -a MyPokedexBackup/springboot/* /opt/tomcat11/MyPokedex/springboot/
+            sudo rm -rf /opt/tomcat11/MyPokedex/springboot
+            sudo rm -rf /opt/tomcat11/MyPokedex/springboot.war
+            sudo cp -a /opt/tomcat11/MyPokedexBackup/springboot.war \
+                       /opt/tomcat11/MyPokedex/springboot.war
 
             # Update Ownership
-            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/springboot
-            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/springboot
-
-            # Update Permissions
-            sudo find /opt/tomcat11/MyPokedex/springboot -type d -exec chmod 755 {} \;
-            sudo find /opt/tomcat11/MyPokedex/springboot -type f -exec chmod 644 {} \;
+            sudo chown tomcat:tomcat /opt/tomcat11/MyPokedex/springboot.war
+            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/springboot.war
+            sudo chmod 755 /opt/tomcat11/MyPokedex/springboot.war
 
             # Start Tomcat 11 Service
             sudo systemctl start tomcat11
