@@ -40,9 +40,9 @@
     <div class="mobile-menu-item mobile-gif-item">
         <label class="mobile-darkmode-label">${isDarkMode ? 'Dark Mode' : 'Light Mode'}</label>
         <div id="mobileThemeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
-            <img src="images/sun.png" alt="Switch to dark mode" class="sun"
+            <img src="${pageContext.request.contextPath}/images/sun.png" alt="Switch to dark mode" class="sun"
                  title="Switch to dark mode" onclick="toggleDarkmodeMobile();">
-            <img src="images/moon.png" alt="Switch to light mode" class="moon"
+            <img src="${pageContext.request.contextPath}/images/moon.png" alt="Switch to light mode" class="moon"
                  title="Switch to light mode" onclick="toggleDarkmodeMobile();">
         </div>
     </div>
@@ -438,7 +438,7 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const currentDarkMode = document.body.classList.contains("darkmode");
         let url = "";
-        url = `${env}` !== "prod" && isMobile
+        url = `${env}` !== "production" && isMobile
             ? "http://" + window.location.hostname + ":4200?tileNumber=1&darkmode=" + currentDarkMode
             : "http://localhost:4200?tileNumber=1&darkmode=" + currentDarkMode;
         url = `${env}` === "production"
