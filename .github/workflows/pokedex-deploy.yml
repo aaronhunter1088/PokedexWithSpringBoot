@@ -88,20 +88,23 @@ jobs:
             # Stop Tomcat 11 Service
             sudo systemctl stop tomcat11
 
-            # Copy Previous Working Version
-            sudo cp -a /opt/tomcat11/MyPokedex/springboot/. /opt/tomcat11/MyPokedexBackup/springboot/
-            sudo rm -rf /opt/tomcat11/MyPokedexBackup/springboot
+            # Remove existing backup to prepare for new backup
             sudo rm -rf /opt/tomcat11/MyPokedexBackup/springboot.war
-            sudo mkdir -p /opt/tomcat11/MyPokedexBackup/springboot
 
-            # Prepare New Version
-            sudo rm -rf /opt/tomcat11/MyPokedex/springboot 
+            # Copy Current Working Version into backup
+            sudo cp -a /opt/tomcat11/MyPokedex/springboot.war /opt/tomcat11/MyPokedexBackup/springboot.war
+
+            # Remove Current Version for new version
+            sudo rm -rf /opt/tomcat11/MyPokedex/springboot
+            sudo rm -rf /opt/tomcat11/MyPokedex/springboot.war
+
+            # Move the deployed war to proper location
             sudo mv /tmp/deploy/dist/${{ inputs.version }}/Pokedex-${{ inputs.version }}-boot.war \
                     /opt/tomcat11/MyPokedex/springboot.war
 
             # Update Ownership
-            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedex/
-            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/*
+            sudo chown tomcat:tomcat /opt/tomcat11/MyPokedex/springboot.war
+            sudo chown -R tomcat:tomcat /opt/tomcat11/MyPokedexBackup/springboot.war
             sudo chmod 755 /opt/tomcat11/MyPokedex/springboot.war
 
             # Start Tomcat 11 Service
@@ -109,7 +112,7 @@ jobs:
 
             # Wait for Tomcat service
             # Wait for Spring Boot WAR to explode
-            sleep 120
+            sleep 60
             
             # Show recent logs
             sudo journalctl -u tomcat11 -n 100 --no-pager
