@@ -11,6 +11,10 @@
 .desktop-controls {
     display: inline-flex;
 }
+.pagination .page-item {
+    margin: 2px;
+    padding: 5px;
+}
 
 /* Mobile Media Query */
 @media screen and (max-width: 650px) {
@@ -285,7 +289,8 @@
     }
     
     .pagination .page-item {
-        margin: 2px;
+        margin: 5px 2px;
+        padding: 5px;
     }
     
     .pagination .page-link {
