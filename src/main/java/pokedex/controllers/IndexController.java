@@ -21,20 +21,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 @Controller
-public class PokemonListController extends BaseController
+public class IndexController extends BaseController
 {
     /* Logging instance */
-    private static final Logger LOGGER = LogManager.getLogger(PokemonListController.class);
+    private static final Logger LOGGER = LogManager.getLogger(IndexController.class);
     private static final String TILE_COLOR_SESSION_KEY = "tileColorParam";
     private static final String DEFAULT_TILE_COLOR = "#4CAF50";
 
-
     @Autowired
-    public PokemonListController(PokemonApiService pokemonService,
-                                 ObjectMapper objectMapper,
-                                 Environment environment,
-                                 DarkmodeService darkmodeService,
-                                 GifService gifService)
+    public IndexController(PokemonApiService pokemonService,
+                           ObjectMapper objectMapper,
+                           Environment environment,
+                           DarkmodeService darkmodeService,
+                           GifService gifService)
     {
         super(pokemonService, objectMapper, environment, darkmodeService, gifService);
     }
@@ -44,15 +43,18 @@ public class PokemonListController extends BaseController
            @RequestParam(name = "darkmode", required = false) String darkmode,
            @RequestParam(name = "tileColor", required = false) String tileColor)
     {
-        if (darkmode != null) {
+        if (StringUtils.hasText(darkmode)) {
             httpSession.setAttribute("isDarkMode", Boolean.parseBoolean(darkmode));
             darkmodeService.setDarkmode(Boolean.parseBoolean(darkmode));
         }
-        if (tileColor != null && !tileColor.isBlank()) {
+        if (StringUtils.hasText(tileColor)) {
             httpSession.setAttribute(TILE_COLOR_SESSION_KEY, sanitizeTileColor(tileColor));
         }
-        if (StringUtils.hasText(darkmode) || StringUtils.hasText(tileColor)) {
+        if (StringUtils.hasText(darkmode) && StringUtils.hasText(tileColor)) {
             LOGGER.info("Homepage accessed with darkmode: {} and tileColor: {}", darkmode, tileColor);
+            return new ModelAndView("redirect:/");
+        } else if (StringUtils.hasText(darkmode)) {
+            LOGGER.info("Homepage accessed with darkmode: {}", darkmode);
             return new ModelAndView("redirect:/");
         }
 
@@ -61,14 +63,16 @@ public class PokemonListController extends BaseController
 
     private ModelAndView renderHomepage(ModelAndView mav, HttpSession httpSession)
     {
-        //Object sessionDarkMode = httpSession.getAttribute("isDarkMode");
-        //isDarkMode = sessionDarkMode instanceof Boolean && (Boolean) sessionDarkMode;
         isDarkMode = darkmodeService.isDarkmode();
         showGifs = gifService.isShowGifs();
 
         lastPageSearched = page;
         if (pokemonMap.isEmpty()) {
             updateSessionMap();
+        } else {
+            // update pokemonMap because clicked on a new page
+            updateSessionMap();
+            httpSession.setAttribute("pokemonMap", pokemonMap);
         }
         
         mav.addObject("pokemonMap", pokemonMap);
@@ -129,7 +133,7 @@ public class PokemonListController extends BaseController
         }
         page = pageNumber;
         // Clear pokemon map to force reload with new page
-        this.pokemonMap.clear();
+        //this.pokemonMap.clear();
         // Clear session cache when changing pages
         httpSession.removeAttribute("pokemonMap");
         return renderHomepage(mav, httpSession);

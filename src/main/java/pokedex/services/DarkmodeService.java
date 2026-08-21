@@ -15,14 +15,11 @@ public class DarkmodeService
      * Set the dark mode state
      * @param darkmode - true for dark mode, false for light mode
      */
-    public void setDarkmode(boolean darkmode) {
-    this.darkmode = darkmode;
-    //this.applyDarkModeToBody();
-}
+    public void setDarkmode(boolean darkmode) { this.darkmode = darkmode; }
 
     /**
      * Get the current dark mode state
-     * @returns current dark mode state
+     * @return current dark mode state
      */
     public boolean isDarkmode() {
         return darkmode;
@@ -31,8 +28,6 @@ public class DarkmodeService
     /**
      * Toggle dark mode on/off
      */
-    public void toggleDarkMode() {
-        setDarkmode(!darkmode);
-    }
+    public void toggleDarkMode() { setDarkmode(!darkmode); }
 
 }

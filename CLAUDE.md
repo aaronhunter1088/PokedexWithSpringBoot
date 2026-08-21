@@ -32,7 +32,7 @@
 
 - JSP files live in `src/main/webapp/WEB-INF/jsp/`; view names returned from controllers match these filenames (for example `index`, `pokedex`, `search`, `evolutions`, `evolves-how`).
 - Main mapped endpoints are in:
-    - `PokemonListController` (`/`, `/page`, `/pkmnPerPage`, `/getPokemonByType`, `/toggleGifs`, `/toggleDarkmode`)
+    - `IndexController` (`/`, `/page`, `/pkmnPerPage`, `/getPokemonByType`, `/toggleGifs`, `/toggleDarkmode`)
     - `PokedexController` (`/pokedex/{nameOrId}`)
     - `EvolutionsController` (`/evolutions/{pokemonId}`)
     - `SearchController` (`/search`)
