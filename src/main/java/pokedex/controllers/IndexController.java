@@ -43,6 +43,7 @@ public class IndexController extends BaseController
            @RequestParam(name = "darkmode", required = false) String darkmode,
            @RequestParam(name = "tileColor", required = false) String tileColor)
     {
+        long startTime = System.nanoTime();
         if (StringUtils.hasText(darkmode)) {
             httpSession.setAttribute("isDarkMode", Boolean.parseBoolean(darkmode));
             darkmodeService.setDarkmode(Boolean.parseBoolean(darkmode));
@@ -58,7 +59,14 @@ public class IndexController extends BaseController
             return new ModelAndView("redirect:/");
         }
 
-        return renderHomepage(mav, httpSession);
+        ModelAndView homepage = renderHomepage(mav, httpSession);
+
+        long endTime = System.nanoTime();
+
+        double duration = (endTime - startTime) / 1_000_000_000.0;
+
+        LOGGER.info("Homepage accessed with duration: {} secs", duration);
+        return homepage;
     }
 
     private ModelAndView renderHomepage(ModelAndView mav, HttpSession httpSession)

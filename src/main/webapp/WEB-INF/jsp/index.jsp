@@ -630,39 +630,8 @@
             let value = pageNumber;
             if (pageNumber === '') return;
             console.log("page to view: " + value);
-            $.ajax({
-                type: "GET",
-                url: "page",
-                data: {
-                    pageNumber: value
-                },
-                async: false,
-                dataType: "application/json",
-                crossDomain: true,
-                statusCode: {
-                    200: function(data) {
-                        console.log('200 setPageToView');
-                        console.log(JSON.parse(JSON.stringify(data.responseText)));
-                        location.reload();
-
-                        let ids = "${pokemonIds}".replace(/[\[\]]/g, '').split(',').map(id => id.trim());
-                        for(let i=0; i<ids.length; i++) {
-                            let pokemonBox = document.getElementById("pokemon"+(ids[0])+"Box");
-                            let currentColor = pokemonBox.style.backgroundColor;
-                            pokemonBox.style.backgroundColor = changeColor(currentColor);
-                        }
-                    },
-                    400: function(data) {
-                        console.log(JSON.parse(JSON.stringify(data.responseText)));
-                    },
-                    404: function() {
-                        console.log('Resource not found');
-                    },
-                    500: function() {
-                        console.log('Server Error');
-                    }
-                }
-            });
+            const contextPath = "${pageContext.request.contextPath}";
+            window.location.href = contextPath + "/page?pageNumber=" + encodeURIComponent(value);
         }
 
         function getByPkmnType(selectObject) {

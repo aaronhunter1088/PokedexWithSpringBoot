@@ -129,17 +129,25 @@
         color: black !important;
     }
     .darkmode .pagination .page-link {
-        background-color: black !important;
-        border-color: #444 !important;
-        color: white !important;
+        background-color: transparent !important;
+        border-color: transparent !important;
+        color: #0d6efd !important;
     }
     .darkmode .pagination .page-item.disabled .page-link {
-        background-color: #1a1a1a !important;
-        color: #888 !important;
+        background-color: transparent !important;
+        color: #5aa2ff !important;
     }
     .lightmode .pagination .page-link {
-        background-color: white !important;
-        color: black !important;
+        background-color: transparent !important;
+        color: #0d6efd !important;
+        border-color: transparent !important;
+    }
+    .pagination .page-link.current-page {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        color: white !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
     }
     .back-to-landing-btn {
         background-color: #4CAF50;
