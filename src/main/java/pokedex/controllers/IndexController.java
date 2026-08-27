@@ -62,10 +62,9 @@ public class IndexController extends BaseController
         ModelAndView homepage = renderHomepage(mav, httpSession);
 
         long endTime = System.nanoTime();
-
         double duration = (endTime - startTime) / 1_000_000_000.0;
+        LOGGER.debug("Homepage accessed with duration: {} secs", duration);
 
-        LOGGER.info("Homepage accessed with duration: {} secs", duration);
         return homepage;
     }
 
