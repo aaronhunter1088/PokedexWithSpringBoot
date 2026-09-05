@@ -94,11 +94,28 @@
 </div>
 
 <script>
-    const MOBILE_MENU_CLOSE_DURATION_MS = 2000;
+    const MOBILE_MENU_CLOSE_DURATION_MS = 300;
     let mobileMenuCloseTimeoutId;
 
     function getIndexFn(name) {
         return window.pokedexIndexFunctions && window.pokedexIndexFunctions[name];
+    }
+
+    function syncMobileHeaderThemeFromBody(isDarkOverride) {
+        const isDark = typeof isDarkOverride === "boolean"
+            ? isDarkOverride
+            : document.body.classList.contains("darkmode");
+        const $mobileHeader = $(".mobile-header");
+        const $mobileMenu = $("#mobileMenu");
+        document.documentElement.style.backgroundColor = isDark ? "black" : "white";
+        document.body.style.backgroundColor = isDark ? "black" : "white";
+        $mobileHeader
+            .toggleClass("darkmode", isDark)
+            .toggleClass("lightmode", !isDark)
+            .css("background-color", isDark ? "black" : "white");
+        $mobileMenu
+            .toggleClass("darkmode", isDark)
+            .toggleClass("lightmode", !isDark);
     }
 
     $(function(){
@@ -110,6 +127,7 @@
             }
         });
         syncMobileGifPreviewState('${showGifs}' === 'true');
+        syncMobileHeaderThemeFromBody();
     });
 
     function toggleMobileMenu() {
@@ -204,7 +222,9 @@
     function toggleDarkmodeMobile() {
         const sharedToggleDarkmode = getIndexFn("toggleDarkmode");
         if (typeof sharedToggleDarkmode === "function") {
-            sharedToggleDarkmode(!document.body.classList.contains("darkmode"));
+            const targetIsDark = !document.body.classList.contains("darkmode");
+            sharedToggleDarkmode(targetIsDark);
+            syncMobileHeaderThemeFromBody(targetIsDark);
             setTimeout(() => {
                 closeMobileMenu();
             }, 500);
@@ -265,8 +285,8 @@
                         $("#gifSwitchDarkmode").prop("checked", isDark);
                     }
                     $(".mobile-darkmode-label").text(isDark ? 'Dark Mode' : 'Light Mode');
-                    $(".mobile-header").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
-                    $("#mobileMenu").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
+                    syncMobileHeaderThemeFromBody();
+                    $(".pokemon-logo").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
                     applyToggleState(themeToggle, isDark);
                     if (typeof syncThemeTogglesWithBody === "function") {
                         syncThemeTogglesWithBody();
@@ -302,11 +322,6 @@
         console.log("showGifs: " + showGifs);
         const showGifsEnabled = showGifs === true || showGifs === 'true';
         syncMobileGifPreviewState(showGifsEnabled);
-        // if (reload) {
-        //     setTimeout(function() {
-        //         location.reload();
-        //     }, 500);
-        // }
     }
 
     function searchForPkmn() {

@@ -16,7 +16,7 @@
                 width: 50px;
                 height: 50px;
                 cursor: pointer;
-                transition: transform 5s ease;
+                transition: transform 2s ease;
             }
 
             .theme-toggle img {
@@ -54,6 +54,12 @@
                 opacity: 1;
                 pointer-events: auto;
                 transform: rotate(180deg) scale(1);
+            }
+
+            #desktopHeader {
+                transition:
+                    background-color 2s ease,
+                    color 2s ease;
             }
 
             #loadingOverlay {
