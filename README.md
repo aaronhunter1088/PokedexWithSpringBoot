@@ -9,7 +9,7 @@ and failing to load the SB homepage. A fix was added to the navigation to ensure
 Another fix was applied to try fetching the data again if the data isn't pulled yet. This helps to ensure that not only
 will the page still load but the data will show on the first attempt.
 
-# v.1.6.4
+# v1.6.4
 This version fixes a bug where the PokeApi client was not returning the data right away. Since we only attempted to call
 the client once, nothing was returned. At first, this was yielding a 500 error because we attempted to access data on
 a null reference. Later, we updated the code to allow the homepage to load without any data shown. Now, we placed the
