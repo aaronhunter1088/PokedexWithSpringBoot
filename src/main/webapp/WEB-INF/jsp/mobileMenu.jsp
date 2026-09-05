@@ -33,7 +33,7 @@
                  alt="pikachu gif preview"
                  title="If GIF is not present, official artwork will show! Click to toggle GIFs."
                  style="cursor:pointer;width:50px;height:50px;object-fit:contain;position:absolute;top:50%;left:50%;display:block;"
-                 onclick="handleMobileGifPreviewClick(this);">
+                 onclick="handleMobileGifPreviewClick();">
         </div>
     </div>
 
@@ -41,9 +41,11 @@
         <label class="mobile-darkmode-label">${isDarkMode ? 'Dark Mode' : 'Light Mode'}</label>
         <div id="mobileThemeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
             <img src="${pageContext.request.contextPath}/images/sun.png" alt="Switch to dark mode" class="sun"
-                 title="Switch to dark mode" onclick="toggleDarkmodeMobile();">
+                 title="Switch to dark mode"
+                 onclick="toggleDarkmodeMobile();">
             <img src="${pageContext.request.contextPath}/images/moon.png" alt="Switch to light mode" class="moon"
-                 title="Switch to light mode" onclick="toggleDarkmodeMobile();">
+                 title="Switch to light mode"
+                 onclick="toggleDarkmodeMobile();">
         </div>
     </div>
 
@@ -64,7 +66,8 @@
             <input id="pageNumberMobile" name="pageNumberMobile" type="text" placeholder="Jump to Page"
                    style="color:${isDarkMode?'white':'black'};"/>
             <div class="mobile-search-icon" style="color:${isDarkMode?'white':'black'};"
-                 onclick="setPageToViewMobile();" title="Jump to Page">
+                 onclick="setPageToViewMobile();"
+                 title="Jump to Page">
                 <i class="fa-brands fa-page4" style="font-size:28px; cursor:pointer;"></i>
             </div>
         </div>
@@ -82,7 +85,7 @@
     </div>
 
     <div class="mobile-menu-item">
-        <button class="back-to-landing-btn icon" onclick="navigateToLandingPage()"
+        <button class="back-to-landing-btn icon" onclick="navigateToLandingPageMobile()"
                 style="background-color:${tileColorParam};"
                 title="Return to Landing Page">
             Back to Landing Page
@@ -93,6 +96,10 @@
 <script>
     const MOBILE_MENU_CLOSE_DURATION_MS = 2000;
     let mobileMenuCloseTimeoutId;
+
+    function getIndexFn(name) {
+        return window.pokedexIndexFunctions && window.pokedexIndexFunctions[name];
+    }
 
     $(function(){
         //checks whether the pressed key is "Enter"
@@ -161,13 +168,19 @@
     }
 
     function handleMobileGifPreviewClick() {
-        toggleGifs();
+        toggleGifsMobile();
     }
 
-    function toggleGifs() {
+    function toggleGifsMobile() {
+        const sharedToggleGifs = getIndexFn("toggleGifs");
+        if (typeof sharedToggleGifs === "function") {
+            sharedToggleGifs();
+            return;
+        }
+        const contextPath = "${pageContext.request.contextPath}";
         $.ajax({
             type: "GET",
-            url: "../toggleGifs",
+            url: contextPath + "/toggleGifs",
             async: false,
             dataType: "application/json",
             crossDomain: true,
@@ -189,6 +202,14 @@
     }
 
     function toggleDarkmodeMobile() {
+        const sharedToggleDarkmode = getIndexFn("toggleDarkmode");
+        if (typeof sharedToggleDarkmode === "function") {
+            sharedToggleDarkmode(!document.body.classList.contains("darkmode"));
+            setTimeout(() => {
+                closeMobileMenu();
+            }, 500);
+            return;
+        }
         const contextPath = "${pageContext.request.contextPath}";
         const currentIsDark = document.body.classList.contains("darkmode");
         const targetIsDark = !currentIsDark;
@@ -267,6 +288,11 @@
     }
 
     function updateGifToggle(reload, data) {
+        const sharedUpdateGifToggle = getIndexFn("updateGifToggle");
+        if (typeof sharedUpdateGifToggle === "function") {
+            sharedUpdateGifToggle(data);
+            return;
+        }
         let showGifs;
         try {
             showGifs = JSON.parse(data.responseText);
@@ -284,6 +310,11 @@
     }
 
     function searchForPkmn() {
+        const sharedSearchForPkmn = getIndexFn("searchForPkmn");
+        if (typeof sharedSearchForPkmn === "function") {
+            sharedSearchForPkmn(document.body.classList.contains("darkmode"));
+            return;
+        }
         let nameOrId = $("#searchMobile").val().trim();
         if (nameOrId === '') {
             return alert('Name or ID is required');
@@ -322,10 +353,16 @@
     }
 
     function setPkmnPerPageImpl(value, isMobile) {
+        const sharedSetPkmnPerPageImpl = getIndexFn("setPkmnPerPageImpl");
+        if (typeof sharedSetPkmnPerPageImpl === "function") {
+            sharedSetPkmnPerPageImpl(value, isMobile);
+            return;
+        }
+        const contextPath = "${pageContext.request.contextPath}";
         console.log("show " + value + " pokemon");
         $.ajax({
             type: "GET",
-            url: "/springboot/pkmnPerPage",
+            url: contextPath + "/pkmnPerPage",
             data: {
                 pkmnPerPage: value
             },
@@ -357,12 +394,22 @@
         {
             return alert('Page number is required');
         }
+        const sharedSetPageToView = getIndexFn("setPageToView");
+        if (typeof sharedSetPageToView === "function") {
+            sharedSetPageToView(pageNumber);
+            return;
+        }
         console.log("page to view: " + pageNumber);
         const contextPath = "${pageContext.request.contextPath}";
         window.location.href = contextPath + "/page?pageNumber=" + encodeURIComponent(pageNumber);
     }
 
     function getByPkmnType(selectObject) {
+        const sharedGetByPkmnType = getIndexFn("getByPkmnType");
+        if (typeof sharedGetByPkmnType === "function") {
+            sharedGetByPkmnType(selectObject);
+            return;
+        }
         let type = selectObject.value;
 
         // Show loading overlay if a type is selected (not "none")
@@ -402,7 +449,12 @@
         console.log(type);
     }
 
-    function navigateToLandingPage() {
+    function navigateToLandingPageMobile() {
+        const sharedNavigateToLandingPage = getIndexFn("navigateToLandingPage");
+        if (typeof sharedNavigateToLandingPage === "function") {
+            sharedNavigateToLandingPage();
+            return;
+        }
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const currentDarkMode = document.body.classList.contains("darkmode");
         let url = "";
