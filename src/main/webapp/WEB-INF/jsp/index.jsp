@@ -707,6 +707,17 @@
             window.location.href = url;
         }
 
+        window.pokedexIndexFunctions = {
+            syncThemeTogglesWithBody,
+            toggleGifs,
+            toggleDarkmode,
+            updateGifToggle,
+            searchForPkmn,
+            setPageToView,
+            setPkmnPerPageImpl,
+            getByPkmnType,
+            navigateToLandingPage
+        };
     </script>
 
 </html>
