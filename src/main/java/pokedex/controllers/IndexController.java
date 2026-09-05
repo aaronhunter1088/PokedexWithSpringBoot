@@ -53,10 +53,10 @@ public class IndexController extends BaseController
         }
         if (StringUtils.hasText(darkmode) && StringUtils.hasText(tileColor)) {
             LOGGER.info("Homepage accessed with darkmode: {} and tileColor: {}", darkmode, tileColor);
-            return new ModelAndView("redirect:/");
+            //return new ModelAndView("redirect:/");
         } else if (StringUtils.hasText(darkmode)) {
             LOGGER.info("Homepage accessed with darkmode: {}", darkmode);
-            return new ModelAndView("redirect:/");
+            //return new ModelAndView("redirect:/");
         }
 
         ModelAndView homepage = renderHomepage(mav, httpSession);
