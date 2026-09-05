@@ -76,7 +76,7 @@
                         <button class="page-link ${isDarkMode ? 'darkmode' : 'lightmode'}" onclick="setPageToView(${(totalPages - 7 + 1) / 2});">...</button>
                     </li>
                 </c:if>
-                <c:forEach begin="${totalPages - 6}" end="${totalPages}" var="pageNumber">
+                <c:forEach begin="${(totalPages - 6) > 1 ? (totalPages - 6) : 1}" end="${totalPages > 1 ? totalPages : 1}" var="pageNumber">
                     <c:if test="${pageNumber > 1}">
                         <li class="page-item">
                             <button class="page-link ${isDarkMode ? 'darkmode' : 'lightmode'} ${page == pageNumber ? 'current-page' : ''}" onclick="setPageToView(${pageNumber});">${pageNumber}</button>
