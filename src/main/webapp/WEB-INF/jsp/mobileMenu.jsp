@@ -322,11 +322,6 @@
         console.log("showGifs: " + showGifs);
         const showGifsEnabled = showGifs === true || showGifs === 'true';
         syncMobileGifPreviewState(showGifsEnabled);
-        // if (reload) {
-        //     setTimeout(function() {
-        //         location.reload();
-        //     }, 500);
-        // }
     }
 
     function searchForPkmn() {
