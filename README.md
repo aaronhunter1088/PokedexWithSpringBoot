@@ -3,6 +3,10 @@
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml)
 
+# v1.6.5
+This version updates the version of Spring Boot. It also applies a fix to the navigation page which was failing to render
+the page properly begin of a value going negative. I've applied a fix to prevent a negative value from being used.
+
 # v.1.6.4
 This version fixes a bug where the PokeApi client was not returning the data right away. Since we only attempted to call
 the client once, nothing was returned. At first, this was yielding a 500 error because we attempted to access data on
