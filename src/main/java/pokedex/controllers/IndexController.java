@@ -74,14 +74,13 @@ public class IndexController extends BaseController
         showGifs = gifService.isShowGifs();
 
         lastPageSearched = page;
+        updateSessionMap();
         if (pokemonMap.isEmpty()) {
+            LOGGER.warn("Initial homepage fetch returned empty pokemonMap for page {}, retrying once", page);
             updateSessionMap();
-        } else {
-            // update pokemonMap because clicked on a new page
-            updateSessionMap();
-            httpSession.setAttribute("pokemonMap", pokemonMap);
         }
-        
+        httpSession.setAttribute("pokemonMap", pokemonMap);
+
         mav.addObject("pokemonMap", pokemonMap);
         mav.addObject("pokemonSprites", getPokemonSprites());
         this.page = lastPageSearched;

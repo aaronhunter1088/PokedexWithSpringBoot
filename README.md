@@ -4,8 +4,10 @@
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml)
 
 # v1.6.5
-This version updates the version of Spring Boot. It also applies a fix to the navigation page which was failing to render
-the page properly begin of a value going negative. I've applied a fix to prevent a negative value from being used.
+This version updates the version of Spring Boot. It also applies a fix where the Pokemon data was not loading right away
+and failing to load the SB homepage. A fix was added to the navigation to ensure no negative numbers would be used. 
+Another fix was applied to try fetching the data again if the data isn't pulled yet. This helps to ensure that not only
+will the page still load but the data will show on the first attempt.
 
 # v.1.6.4
 This version fixes a bug where the PokeApi client was not returning the data right away. Since we only attempted to call
