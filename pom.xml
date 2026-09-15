@@ -75,6 +75,11 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-data-jpa</artifactId>
                 </exclusion>
+                <!-- devtools restart classloader creates a LinkageError when mixed with the app classloader -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-devtools</artifactId>
+                </exclusion>
                 <!-- mysql connector -->
                 <exclusion>
                     <groupId>com.mysql</groupId>
@@ -247,7 +252,7 @@
                 </executions>
                 <configuration>
                     <!--                    <outputDirectory>${outputDirectory}</outputDirectory>-->
-                    <!--                    <excludeDevtools>true</excludeDevtools>-->
+                    <excludeDevtools>true</excludeDevtools>
                     <!--                    <layers enabled="false"/>-->
                 </configuration>
             </plugin>
