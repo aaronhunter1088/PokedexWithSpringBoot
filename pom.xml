@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>Pokedex</artifactId>
-    <version>1.10.0</version>
+    <version>1.10.1</version>
     <packaging>war</packaging>
     <name>Pokédex</name>
     <description>Springboot Pokédex App</description>
@@ -23,7 +23,8 @@
         <jakarta.servlet.jstl.version>3.0.1</jakarta.servlet.jstl.version>
         <jakarta.servlet.jstl-api.version>3.0.2</jakarta.servlet.jstl-api.version>
         <jakarta.ws.rs-api.version>4.0.0</jakarta.ws.rs-api.version>
-        <pokedexapi.version>1.6.5</pokedexapi.version>
+        <pokedexapi.version>1.10.1</pokedexapi.version>
+        <springdoc.version>3.1.1</springdoc.version>
         <!-- Used to test new versions --><!--
         <spring.boot.version>4.1.0</spring.boot.version> -->
         <taglibs.standard.version>1.2.5</taglibs.standard.version>
@@ -41,6 +42,7 @@
          Note: Jackson 3.x (tools.jackson, used by Spring Boot 4.x) and 2.x (com.fasterxml.jackson,
          used by swagger-core-jakarta) have different package names and coexist safely.
          Remove when Swaggerdoc's upgrades to Jackson 3.x. -->
+    <!--
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -51,6 +53,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    -->
 
     <dependencies>
         <!-- Classifier "code" jar contains the main code classes -->
@@ -87,6 +90,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- caffeine cache: required by PokedexApi cache configuration -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <!-- spring cache support: provides CaffeineCacheManager used by PokedexApi -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
         <!-- spring boot starter webservices -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -116,6 +129,12 @@
         <dependency>
             <groupId>skaro.pokeapi</groupId>
             <artifactId>pokeapi-reactor</artifactId>
+        </dependency>
+        <!-- springdoc/swagger: required by PokedexApi OpenAPI configuration and annotations -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.ws.rs/javax.ws.rs-api -->
         <dependency>
