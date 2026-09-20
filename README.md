@@ -1,7 +1,7 @@
 # Pokédex With Spring Boot
 
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
-[![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml)
+[![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml) [![Dependabot Updates](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates)
 
 # v1.10.1
 This version updates a few dependencies that needed to be updated. It also updates a bug where the darkmode/lightmode
