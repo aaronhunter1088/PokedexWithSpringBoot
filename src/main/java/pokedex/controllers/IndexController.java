@@ -116,11 +116,17 @@ public class IndexController extends BaseController
 
     @GetMapping("/toggleDarkmode")
     @ResponseBody
-    public Boolean toggleDarkmode()
+    public Boolean toggleDarkmode(
+            @RequestParam(name = "darkmode", required = false) Boolean requestedDarkmode,
+            HttpSession httpSession)
     {
-        //darkmodeService.setDarkmode(!darkmodeService.isDarkmode());
-        darkmodeService.toggleDarkMode();
+        if (requestedDarkmode == null) {
+            darkmodeService.toggleDarkMode();
+        } else {
+            darkmodeService.setDarkmode(requestedDarkmode);
+        }
         isDarkMode = darkmodeService.isDarkmode();
+        httpSession.setAttribute("isDarkMode", isDarkMode);
         LOGGER.info("isDarkMode: {}", isDarkMode);
         return isDarkMode;
     }

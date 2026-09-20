@@ -306,6 +306,19 @@
             $(".mobile-darkmode-label").text(isDark ? "Dark Mode" : "Light Mode");
         }
 
+        function applyDarkmodeState(isDark) {
+            const $body = $("body");
+            $body.toggleClass("dark darkmode", isDark);
+            $body.toggleClass("light lightmode", !isDark);
+            document.documentElement.style.backgroundColor = isDark ? "black" : "white";
+            document.body.style.backgroundColor = isDark ? "black" : "white";
+            $(".pokemon-logo").toggleClass("darkmode", isDark).toggleClass("lightmode", !isDark);
+            if (typeof syncMobileHeaderThemeFromBody === "function") {
+                syncMobileHeaderThemeFromBody(isDark);
+            }
+            syncThemeTogglesWithBody();
+        }
+
         function toggleGifPlayback(imageElement) {
             if (!imageElement) {
                 return;
@@ -510,50 +523,38 @@
             console.log('toggling darkmode: ' + updatedDarkmode);
             const isDark = updatedDarkmode === true || updatedDarkmode === "true";
             const themeToggle = document.getElementById("themeToggle");
-            const sunIcon = themeToggle.querySelector(".sun");
-            const moonIcon = themeToggle.querySelector(".moon");
-            const outgoingIcon = isDark ? sunIcon : moonIcon;
-            const incomingIcon = isDark ? moonIcon : sunIcon;
-            const rotation = isDark ? 180 : -180;
+            applyDarkmodeState(isDark);
 
-            outgoingIcon.animate([
-                { opacity: 1, transform: "rotate(0deg) scale(1)" },
-                { opacity: 0, transform: "rotate(" + rotation + "deg) scale(0.5)" }
-            ], { duration: 500, easing: "ease", fill: "forwards" });
-            incomingIcon.animate([
-                { opacity: 0, transform: "rotate(" + (-rotation) + "deg) scale(0.5)" },
-                { opacity: 1, transform: "rotate(0deg) scale(1)" }
-            ], { duration: 500, easing: "ease", fill: "forwards" });
+            if (themeToggle) {
+                const sunIcon = themeToggle.querySelector(".sun");
+                const moonIcon = themeToggle.querySelector(".moon");
+                if (sunIcon && moonIcon) {
+                    const outgoingIcon = isDark ? sunIcon : moonIcon;
+                    const incomingIcon = isDark ? moonIcon : sunIcon;
+                    const rotation = isDark ? 180 : -180;
 
-            themeToggle.classList.toggle("dark", isDark);
-            sunIcon.style.opacity = isDark ? "0" : "1";
-            sunIcon.style.pointerEvents = isDark ? "none" : "auto";
-            moonIcon.style.opacity = isDark ? "1" : "0";
-            moonIcon.style.pointerEvents = isDark ? "auto" : "none";
+                    outgoingIcon.animate([
+                        { opacity: 1, transform: "rotate(0deg) scale(1)" },
+                        { opacity: 0, transform: "rotate(" + rotation + "deg) scale(0.5)" }
+                    ], { duration: 500, easing: "ease", fill: "forwards" });
+                    incomingIcon.animate([
+                        { opacity: 0, transform: "rotate(" + (-rotation) + "deg) scale(0.5)" },
+                        { opacity: 1, transform: "rotate(0deg) scale(1)" }
+                    ], { duration: 500, easing: "ease", fill: "forwards" });
+                }
+            }
 
             $.ajax({
                 type: "GET",
-                url: "toggleDarkmode",
+                url: "${pageContext.request.contextPath}/toggleDarkmode",
                 data: {
                     darkmode: updatedDarkmode
                 },
-                async: false,
-                dataType: "application/json",
-                crossDomain: true,
-                statusCode: {
-                    200: function(result) {
-                        console.log('toggleDarkmode: ' + JSON.stringify(result.responseText));
-                        const $body = $('body');
-                        $body.toggleClass('dark darkmode', isDark);
-                        $body.toggleClass('light lightmode', !isDark);
-                        syncThemeTogglesWithBody();
-                    },
-                    404: function() {
-                        console.log('Failed');
-                    },
-                    500: function() {
-                        console.log('Server Error');
-                    }
+                success: function() {
+                    console.log('dark mode preference saved: ' + isDark);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to update dark mode: ' + status + ' - ' + error);
                 }
             });
         }
