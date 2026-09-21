@@ -30,6 +30,11 @@
         <taglibs.standard.version>1.2.5</taglibs.standard.version>
         <taglibs.standard.impl.version>1.2.5</taglibs.standard.impl.version>
         <maven.war.plugin.version>3.5.1</maven.war.plugin.version>
+
+        <springdoc.openapi.swagger-ui-url>http://localhost:4201/springboot/swagger-ui/index.html</springdoc.openapi.swagger-ui-url>
+        <springdoc.openapi.docs-url>http://localhost:4201/springboot/v3/api-docs</springdoc.openapi.docs-url>
+        <springdoc.openapi.prod.swagger-ui-url>https://mypokedex.us/springboot/swagger-ui/index.html</springdoc.openapi.prod.swagger-ui-url>
+        <springdoc.openapi.prod.docs.url>https://mypokedex.us/springboot/v3/api-docs</springdoc.openapi.prod.docs.url>
     </properties>
 
     <!-- Included in Parent. Left as a reference
