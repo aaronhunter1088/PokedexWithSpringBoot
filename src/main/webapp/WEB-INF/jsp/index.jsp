@@ -390,7 +390,7 @@
         }
 
         $(function() {
-            testFunction();
+            testFunction('index');
             clearHomepageQueryParams();
             updateGifToggle(false, "${showGifs}");
 

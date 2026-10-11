@@ -119,6 +119,7 @@
     }
 
     $(function(){
+        testFunction('mobileMenu');
         //checks whether the pressed key is "Enter"
         $('#searchMobile').on('keypress', function(e) {
             if ($('#searchMobile').val() === '') return;

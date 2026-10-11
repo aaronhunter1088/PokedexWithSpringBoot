@@ -32,6 +32,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
 <!-- Add more common links and scripts here -->
+<script src="${pageContext.request.contextPath}/resources/js/pokedex-functions.js" type="text/javascript"></script>
 
 <!-- Common styling -->
 <style>

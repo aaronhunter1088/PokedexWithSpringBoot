@@ -3,8 +3,7 @@
 <head>
     <title>Search</title>
     <jsp:include page="headCommon.jsp"/>
-    <style>
-    </style>
+    <style></style>
 </head>
 <body style="justify-content:space-evenly;text-align:center;"
       class="${isDarkMode?'darkmode':'lightmode'}">
