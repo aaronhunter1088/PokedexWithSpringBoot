@@ -325,11 +325,11 @@
     }
 
     function searchForPkmn() {
-        const sharedSearchForPkmn = getIndexFn("searchForPkmn");
-        if (typeof sharedSearchForPkmn === "function") {
-            sharedSearchForPkmn(document.body.classList.contains("darkmode"));
-            return;
-        }
+        // const sharedSearchForPkmn = getIndexFn("searchForPkmn");
+        // if (typeof sharedSearchForPkmn === "function") {
+        //     sharedSearchForPkmn(document.body.classList.contains("darkmode"));
+        //     return;
+        // }
         let nameOrId = $("#searchMobile").val().trim();
         if (nameOrId === '') {
             return alert('Name or ID is required');
@@ -339,10 +339,11 @@
         const contextPath = "${pageContext.request.contextPath}";
         const encodedNameOrId = encodeURIComponent(nameOrId);
         const isDarkMode = document.body.classList.contains("darkmode");
+        console.log('isDarkMode: ' + isDarkMode);
 
         $.ajax({
             type: "GET",
-            url: contextPath + "/pokemon/" + encodedNameOrId,
+            url: contextPath + "/pokemon/" + encodedNameOrId + "?darkmode=" + isDarkMode,
             dataType: "json"
         })
         .done(function() {

@@ -161,7 +161,7 @@
                     <div class="search-icon">
                         <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
                              class="button cursor search-icon" title="Search for Pokemon" style="height:50px;width:50px;"
-                             onclick="searchForPkmn(${isDarkMode})">
+                             onclick="searchForPkmn()">
                     </div>
                 </div>
                 &emsp;
@@ -596,7 +596,7 @@
             imgTag.src = artwork;
         }
 
-        function searchForPkmn(isDarkMode) {
+        function searchForPkmn() {
             let nameOrId = $("#search").val().trim();
             if (nameOrId === '') {
                 nameOrId = $("#searchMobile").val().trim();
@@ -610,10 +610,12 @@
 
             const contextPath = "${pageContext.request.contextPath}";
             const encodedNameOrId = encodeURIComponent(nameOrId);
+            const isDarkMode = document.body.classList.contains("darkmode");
+            console.log('isDarkMode: ' + isDarkMode);
 
             $.ajax({
                 type: "GET",
-                url: contextPath + "/pokemon/" + encodedNameOrId,
+                url: contextPath + "/pokemon/" + encodedNameOrId + "?darkmode=" + isDarkMode,
                 dataType: "json"
             })
             .done(function() {

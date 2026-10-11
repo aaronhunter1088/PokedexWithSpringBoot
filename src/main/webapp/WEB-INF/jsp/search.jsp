@@ -23,7 +23,7 @@
              src="${pageContext.request.contextPath}/images/pokeball_search.png"
              style="width:30px; height:30px; cursor: pointer;"
              title="Search for Pkmn"
-             onclick="searchForPkmn('${isDarkMode}');">
+             onclick="searchForPkmn();">
     </h4>
 
 </body>
@@ -35,12 +35,12 @@
         $('#search').on('keypress', function(e) {
             if ($('#search').val() === '') return;
             if (e.code === 'Enter' || e.code === 'Return') {
-                searchForPkmn('${isDarkMode}');
+                searchForPkmn();
             }
         });
     });
 
-    function searchForPkmn(isDarkMode) {
+    function searchForPkmn() {
         let nameOrId = $("#search").val().trim();
         if (nameOrId === '') {
             nameOrId = $("#searchMobile").val().trim();
@@ -49,10 +49,12 @@
 
         const contextPath = "${pageContext.request.contextPath}";
         const encodedNameOrId = encodeURIComponent(nameOrId);
+        const isDarkMode = document.body.classList.contains("darkmode");
+        console.log('isDarkMode: ' + isDarkMode);
 
         $.ajax({
             type: "GET",
-            url: contextPath + "/pokemon/" + encodedNameOrId,
+            url: contextPath + "/pokemon/" + encodedNameOrId + "?darkmode=" + isDarkMode,
             dataType: "json"
         })
         .done(function() {
