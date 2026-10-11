@@ -5,6 +5,7 @@
     <head>
         <title>Pok&#233;dex Spring Boot</title>
         <jsp:include page="headCommon.jsp"/>
+        <script src="${pageContext.request.contextPath}/resources/js/pokedex-functions.js" type="text/javascript"></script>
         <style>
             body {
                 transition:
@@ -389,6 +390,7 @@
         }
 
         $(function() {
+            testFunction();
             clearHomepageQueryParams();
             updateGifToggle(false, "${showGifs}");
 

@@ -466,7 +466,7 @@
         console.log(type);
     }
 
-    function navigateToLandingPage() {
+    function navigateToLandingPageMobile() {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const currentDarkMode = document.body.classList.contains("darkmode");
         let url = "";

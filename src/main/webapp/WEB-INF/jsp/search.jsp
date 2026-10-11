@@ -30,6 +30,7 @@
 
 <script type="text/javascript">
     $(function(){
+        testFunction('Search Page');
         $('#pokedex').hide();
         //checks whether the pressed key is "Enter"
         $('#search').on('keypress', function(e) {
