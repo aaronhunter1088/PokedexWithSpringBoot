@@ -3,6 +3,10 @@
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/pokedex-deploy.yml) [![Dependabot Updates](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates)
 
+# v1.10.2
+This version updates dependencies and removes some duplicate properties. It also fixes an issue with the mobile search
+function not working, now fixed.
+
 # v1.10.1
 This version updates a few dependencies that needed to be updated. It also updates a bug where the darkmode/lightmode
 was not changing when clicked.
