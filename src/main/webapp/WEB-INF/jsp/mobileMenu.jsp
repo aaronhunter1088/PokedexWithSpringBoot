@@ -338,6 +338,7 @@
 
         const contextPath = "${pageContext.request.contextPath}";
         const encodedNameOrId = encodeURIComponent(nameOrId);
+        const isDarkMode = document.body.classList.contains("darkmode");
 
         $.ajax({
             type: "GET",
