@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import pokedex.services.DarkmodeService;
@@ -34,8 +35,9 @@ public class BaseController
     private static final int MAX_WAIT_ITERATIONS = 30; // Max iterations to wait (30 * 100ms = 3 seconds)
     private static final int TIMEOUT_MULTIPLIER = 20; // Multiplier for extended timeout (20 * 3s = 60 seconds)
     private static final int PROGRESS_LOG_INTERVAL = 50; // Log progress every 50 iterations (5 seconds)
-    private static final int HOMEPAGE_FETCH_MAX_ATTEMPTS = 20;
-    private static final int HOMEPAGE_FETCH_RETRY_DELAY_MS = 250;
+    @Value("${fetch.max.attempts:3}")
+    private int HOMEPAGE_FETCH_MAX_ATTEMPTS;
+    private final int HOMEPAGE_FETCH_RETRY_DELAY_MS = 250;
     
     protected final PokemonApiService pokemonService;
     protected final ObjectMapper objectMapper;
@@ -245,6 +247,7 @@ public class BaseController
 
         for (int attempt = 1; attempt <= HOMEPAGE_FETCH_MAX_ATTEMPTS; attempt++) {
             fetchedPokemonMap.clear();
+            LOGGER.debug("Injected service class: {}", pokemonService.getClass().getName());
             pokemonList = pokemonService.getAllPokemons(pkmnPerPage, offset);
             if (pokemonList == null || pokemonList.results() == null || pokemonList.results().isEmpty()) {
                 LOGGER.warn("Attempt {} returned no pokemon resources for page {}", attempt, requestedPage);
