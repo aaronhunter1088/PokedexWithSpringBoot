@@ -1,4 +1,10 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<script>
+    window.pokedexConfig = {
+        contextPath: "${pageContext.request.contextPath}",
+        env: "${env}"
+    };
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/images/pokeball_tabs.png"/>
 

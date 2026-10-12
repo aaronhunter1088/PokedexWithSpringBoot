@@ -4,7 +4,6 @@
 <html lang="en">
 <head>
     <title>How Evolves</title>
-    <jsp:include page="headCommon.jsp"/>
     <style>
         .listStyle {
             display: block;
