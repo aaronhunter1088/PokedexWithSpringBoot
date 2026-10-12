@@ -103,7 +103,7 @@
                 searchForPkmn();
             }
         });
-        syncMobileGifPreviewState('${showGifs}' === 'true');
+        syncMobileGifPreviewState(window.pokedexConfig.showGifs);
         syncMobileHeaderThemeFromBody();
     });
 </script>

@@ -216,12 +216,14 @@ function toggleDarkmode() {
         },
         success: function() {
             console.log('dark mode preference saved: ' + isDarkMode);
-            closeMobileMenu();
         },
         error: function(xhr, status, error) {
             console.error('Failed to update dark mode: ' + status + ' - ' + error);
         }
     });
+    setTimeout(() => {
+        closeMobileMenu();
+    }, 1000);
 }
 
 function updateGifToggle(data) {
@@ -236,9 +238,7 @@ function updateGifToggle(data) {
     $("#gifSwitch").prop("checked", showGifsEnabled);
     $("#gifSwitchMobile").prop("checked", showGifsEnabled);
     syncGifPreviewState(showGifsEnabled);
-    if (typeof syncMobileGifPreviewState === "function") {
-        syncMobileGifPreviewState(showGifsEnabled);
-    }
+    syncMobileGifPreviewState(showGifsEnabled);
     applyGifModeToGrid(showGifsEnabled);
 }
 
