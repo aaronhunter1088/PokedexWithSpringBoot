@@ -157,7 +157,7 @@
                 </div>
                 &emsp;
                 <div id="searchForPkmn" class="search-box" style="display:flex; --input-shadow-color:${tileColorParam};">
-                    <input id="search" name="search" type="text" placeholder="Name or ID"/>
+                    <input id="search" name="search" type="text" placeholder="Name or ID" autocomplete="off"/>
                     <div class="search-icon">
                         <img alt="pokéball" src="${pageContext.request.contextPath}/images/pokeball_search.png"
                              class="button cursor search-icon" title="Search for Pokemon" style="height:50px;width:50px;"

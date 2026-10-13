@@ -1,4 +1,7 @@
 // Place common functions here
+let pokemon = {}, sprites = {};
+let locations = [], moves = [];
+let desc = "", color = "";
 
 function logFromWhere(pageName) {
     console.log("Test function called from " + pageName);
@@ -143,6 +146,7 @@ function setPkmnPerPageImpl(value, isMobile) {
                 console.log(JSON.parse(JSON.stringify(data.responseText)));
                 if (isMobile) closeMobileMenu();
                 location.reload();
+                clearHomepageQueryParams();
             },
             400: function(data) {
                 console.log(JSON.parse(JSON.stringify(data.responseText)));
@@ -167,6 +171,7 @@ function toggleGifs() {
         statusCode: {
             200: function(data) {
                 updateGifToggle(data);
+                clearHomepageQueryParams();
             },
             404: function() {
                 console.log('Failed');
@@ -211,9 +216,9 @@ function toggleDarkmode() {
     $.ajax({
         type: "GET",
         url: window.pokedexConfig.contextPath + "/toggleDarkmode",
-        data: {
-            darkmode: isDarkMode
-        },
+        // data: {
+        //     darkmode: isDarkMode
+        // },
         success: function() {
             console.log('dark mode preference saved: ' + isDarkMode);
         },
@@ -284,15 +289,16 @@ function searchForPkmn() {
 
     $.ajax({
         type: "GET",
-        url: contextPath + "/pokemon/" + encodedNameOrId + "?darkmode=" + isDarkMode,
+        url: contextPath + "/pokemon/" + encodedNameOrId, // + "?darkmode=" + isDarkMode,
         dataType: "json"
     })
     .done(function() {
-        const url = contextPath + "/pokedex/" + encodedNameOrId
-            + "?darkmode=" + isDarkMode;
+        const url = contextPath + "/pokedex/" + encodedNameOrId;
+            //+ "?darkmode=" + isDarkMode;
 
         console.log("Navigating to: " + url);
         window.location.href = url;
+        clearHomepageQueryParams();
     })
     .fail(function(xhr) {
         console.log(xhr.responseText);
@@ -306,11 +312,35 @@ function searchForPkmn() {
 }
 
 function setPageToView(pageNumber) {
-    let value = pageNumber;
+    //let value = pageNumber;
     if (pageNumber === '') return;
-    console.log("page to view: " + value);
+    console.log("page to view: " + pageNumber);
+    const contextPath = window.pokedexConfig.contextPath;
+    //const encodedNameOrId = encodeURIComponent(pageNumber);
+    $.ajax({
+        type: "GET",
+        url: contextPath + "/page",
+        dataType: "html",
+        data: {
+            pageNumber: pageNumber
+        }
+    }).done(function() {
+            const url = window.pokedexConfig.contextPath + "/page?pageNumber=" + encodeURIComponent(pageNumber);
+            console.log("Navigating to: " + url);
+            window.location.reload();
+            clearHomepageQueryParams();
+        })
+        .fail(function(xhr) {
+            console.log(xhr.responseText);
+
+            if (xhr.status === 400) {
+                alert("Page not found.");
+            } else {
+                alert("Page search failed. Please try again later.");
+            }
+        });
     //const contextPath = "${pageContext.request.contextPath}";
-    window.location.href = window.pokedexConfig.contextPath + "/page?pageNumber=" + encodeURIComponent(value);
+    //window.location.href = window.pokedexConfig.contextPath + "/page?pageNumber=" + encodeURIComponent(value);
 }
 
 function getByPkmnType(selectObject) {
@@ -506,30 +536,52 @@ function getPokemonDescriptionText(name) {
     return desc.responseText;
 }
 // Flips between regular and shiny images
-function showImage(type) {
-    let photoEle = $('#imageOfPokemon');
-    let image;
+function showImage(type, image) {
+    let photoEle = $("#pkmnImage");
     switch (type) {
         case 'default' : {
-            image = sprites["frontDefault"];
-            if (image === null) {
-                image = "/images/pokeball_search.png";
+            if (image === '') {
+                image = '/images/pokeball_search.png';
             }
-            $('#pokemonDefaultImgBtn').css('font-weight', 'bold');
-            $('#pokemonShinyImgBtn').css('font-weight', 'normal');
+            $("#defaultImgBtn").css('font-weight', 'bold');
+            $("#officialImgBtn").css('font-weight', 'normal');
+            $("#shinyImgBtn").css('font-weight', 'normal');
+            $("#gifImgBtn").css('font-weight', 'normal');
+            break;
+        }
+        case 'official' : {
+            if (image === '') {
+                image = '/images/pokeball_search.png';
+            }
+            $("#defaultImgBtn").css('font-weight', 'normal');
+            $("#officialImgBtn").css('font-weight', 'bold');
+            $("#shinyImgBtn").css('font-weight', 'normal');
+            $("#gifImgBtn").css('font-weight', 'normal');
             break;
         }
         case 'shiny' : {
-            image = sprites["frontShiny"];
-            if (image === null) {
-                image = "/images/pokeball_search.png";
+            if (image === '') {
+                image = '/images/pokeball_search.png';
             }
-            $('#pokemonDefaultImgBtn').css('font-weight', 'normal');
-            $('#pokemonShinyImgBtn').css('font-weight', 'bold');
+            $("#defaultImgBtn").css('font-weight', 'normal');
+            $("#officialImgBtn").css('font-weight', 'normal');
+            $("#shinyImgBtn").css('font-weight', 'bold');
+            $("#gifImgBtn").css('font-weight', 'normal');
+            break;
+        }
+        case 'gif' : {
+            if (image === '') {
+                image = '/images/pokeball_search.png';
+            }
+            console.log('image: ' + image);
+            $("#defaultImgBtn").css('font-weight', 'normal');
+            $("#officialImgBtn").css('font-weight', 'normal');
+            $("#shinyImgBtn").css('font-weight', 'normal');
+            $("#gifImgBtn").css('font-weight', 'bold');
             break;
         }
         default : {
-            image = "/images/pokeball_search.png";
+            image = '/images/pokeball_search.png';
             break;
         }
     }

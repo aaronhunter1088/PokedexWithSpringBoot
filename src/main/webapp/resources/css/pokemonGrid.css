@@ -80,11 +80,29 @@ body.dark-mode #search:focus {
     box-sizing: border-box;
 }
 
+/* Dark mode */
 body.darkmode .input-box input,
 body.darkmode .search-box input {
     background-color: black !important;
     color: white !important;
     -webkit-text-fill-color: white !important;
+    caret-color: white;
+}
+
+/* Chrome autofill in dark mode */
+body.darkmode .input-box input:-webkit-autofill,
+body.darkmode .input-box input:-webkit-autofill:hover,
+body.darkmode .input-box input:-webkit-autofill:focus,
+body.darkmode .input-box input:-webkit-autofill:active,
+body.darkmode .search-box input:-webkit-autofill,
+body.darkmode .search-box input:-webkit-autofill:hover,
+body.darkmode .search-box input:-webkit-autofill:focus,
+body.darkmode .search-box input:-webkit-autofill:active {
+    background-color: black !important;
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+    transition: background-color 9999s ease-out;
 }
 
 .input-box input::placeholder,

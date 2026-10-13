@@ -61,10 +61,10 @@ public class PokedexController extends BaseController
         }
         pokemon = setupPokedex(pokemon);
         mav.addObject("pokemonId", super.pokemonId);
-        mav.addObject("defaultImage", pokemon.defaultImage());
-        mav.addObject("officialImage", pokemon.officialImage());
-        mav.addObject("gifImage", pokemon.gifImage());
-        mav.addObject("shinyImage", pokemon.shinyImage());
+        mav.addObject("defaultImage", pokemon.sprites().getFrontDefault());
+        mav.addObject("officialImage", pokemon.sprites().getOther().getOfficialArtwork().getFrontDefault());
+        mav.addObject("gifImage", pokemon.sprites().getVersions().getGenerationV().getBlackWhite().getAnimated().getFrontDefault());
+        mav.addObject("shinyImage", pokemon.sprites().getOther().getOfficialArtwork().getFrontShiny());
         mav.addObject("pokemon", pokemon);
         mav.addObject("randomDescriptionNumber", !pokemon.descriptions().isEmpty() ?
                 new Random().nextInt(pokemon.descriptions().size()) : 0);
