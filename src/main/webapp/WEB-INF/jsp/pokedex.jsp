@@ -89,10 +89,10 @@
                         <button id="evolvesHowBtn" class="tab" onclick="showDiv('evolvesHow', '${pokemon.id}');">How ${pokemon.name().substring(0,1).toUpperCase()}${pokemon.name().substring(1)} Evolves</button>
                     </div>
                     <div id="photoButtonsDiv" style="display:flex;justify-content:center;gap:5px;flex-wrap:wrap;">
-                        <button id="defaultImgBtn" class="tab" onclick="showImage('default');">Show Default</button>
-                        <button id="officialImgBtn" class="tab" onclick="showImage('official');">Show Official</button>
-                        <button id="shinyImgBtn" class="tab" onclick="showImage('shiny');">Show Shiny</button>
-                        <button id="gifImgBtn" class="tab" onclick="showImage('gif');">Show Gif</button>
+                        <button id="defaultImgBtn" class="tab" onclick="showImage('default', '${defaultImage}');">Show Default</button>
+                        <button id="officialImgBtn" class="tab" onclick="showImage('official', '${officialImage}');">Show Official</button>
+                        <button id="shinyImgBtn" class="tab" onclick="showImage('shiny', '${shinyImage}');">Show Shiny</button>
+                        <button id="gifImgBtn" class="tab" onclick="showImage('gif', '${gifImage}');">Show Gif</button>
                     </div>
                 </div>
                 <br>
