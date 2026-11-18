@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import pokedex.services.DarkmodeService;
@@ -54,6 +55,7 @@ public class EvolvesHowController extends BaseController
         super(pokemonService, objectMapper, environment, darkmodeService, gifService);
     }
 
+    @GetMapping(value = "/evolves-how")
     public ModelAndView evolvesHow(@RequestParam(name = "pokemonId") int pokemonId, ModelAndView mav)
     {
         logger.info("pokemonId: {}", pokemonId);
@@ -84,11 +86,12 @@ public class EvolvesHowController extends BaseController
 
     private void setupEvolvesHow()
     {
+        resetState();
         this.pokemonIDToEvolutionChainMap = this.pokemonService.getEvolutionsMap();
         this.pokemonIdAndAttributesMap = new HashMap<>();
         this.specificAttributesMap = generateDefaultAttributesMap();
         this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, String.valueOf(pokemonId));
-        this.family = this.pokemonIDToEvolutionChainMap.get(this.pokemonChainID);
+        this.family = this.pokemonIDToEvolutionChainMap.getOrDefault(this.pokemonChainID, new ArrayList<>());
         logger.info("family: {}", family);
         this.allIDs = family.stream().flatMap(Collection::stream).toList();
         logger.info("allIDs: {}", allIDs);
@@ -112,6 +115,30 @@ public class EvolvesHowController extends BaseController
                 logger.info("does pokemon evolve: {}", doesPokemonEvolve);
             }
         }
+    }
+
+    /**
+     * This controller is a singleton, so values from a previous request must not leak into this one.
+     */
+    private void resetState()
+    {
+        this.doesPokemonEvolve = false;
+        this.hasMinimumLevel = false;
+        this.hasUseItem = false;
+        this.hasHeldItem = false;
+        this.hasMinimumHappiness = false;
+        this.isABaby = false;
+        this.hasDayNight = false;
+        this.hasLocations = false;
+        this.hasMinimumAffection = false;
+        this.hasBeauty = false;
+        this.hasKnownMoves = false;
+        this.hasKnownMoveType = false;
+        this.hasNeedsRain = false;
+        this.hasTradeSpecies = false;
+        this.hasTurnUpsideDown = false;
+        this.emptyChain = true;
+        this.pokemonChainID = 0;
     }
 
     private void getEvolutionDetails(Map<String, Object> chain)
@@ -174,7 +201,7 @@ public class EvolvesHowController extends BaseController
         this.specificAttributesMap.put("useItem", (null != map) ? map.get("name") : null);
         this.specificAttributesMap.put("minHappiness", details.get("min_happiness"));
         this.specificAttributesMap.put("minLevel", details.get("min_level"));
-        this.specificAttributesMap.put("timeOfDay", (details.get("time_of_day") != "") ? details.get("time_of_day") : null);
+        this.specificAttributesMap.put("timeOfDay", (!"".equals(details.get("time_of_day"))) ? details.get("time_of_day") : null);
         map = ((Map<?, ?>) details.get("location"));
         this.specificAttributesMap.put("location", (null != map) ? map.get("name") : null);
         this.specificAttributesMap.put("needsRain", details.get("needs_overworld_rain"));
@@ -204,34 +231,40 @@ public class EvolvesHowController extends BaseController
     public void updateAttributesMap(Map<String, Object> details, Map<String, Object> attributesMap)
     {
         logger.info("evolution_detailsUpdate for: {} {}", attributesMap.get("name"), details);
-        List<String> checkDetails = Arrays.asList("gender", "held_item", "item", "min_happiness",
+        List<String> checkDetails = Arrays.asList("gender", "held_item", "item", "min_level", "min_happiness",
                 "time_of_day", "location", "needs_overworld_rain", "min_affection", "min_beauty",
                 "known_move", "known_move_type", "party_species", "relative_physical_stats",
                 "trade_species", "turn_upside_down", "trigger");
         for (String detail : checkDetails) {
-            if (details.get(detail) != null) {
-                if (attributesMap.get(convertToCamelCase(detail)) == null) {
-                    if (details.get(detail) instanceof Map) {
-                        attributesMap.put(convertToCamelCase(detail), ((Map<?, ?>) details.get(detail)).get("name"));
-                    } else {
-                        attributesMap.put(convertToCamelCase(detail), details.get(detail));
-                    }
-                } else {
-                    var dtl = attributesMap.get(convertToCamelCase(detail));
-                    Object newDetail = details.get(detail);
-                    List<String> updateDetails = new ArrayList<>();
-                    if (dtl instanceof String d) updateDetails.add(d);
-                    else if (dtl instanceof List<?> d) {
-                        @SuppressWarnings("unchecked")
-                        List<String> detailsList = (List<String>) d;
-                        updateDetails.addAll(detailsList);
-                    }
-                    updateDetails.add(String.valueOf(newDetail));
-                    attributesMap.put(convertToCamelCase(detail), updateDetails);
-                }
+            Object newDetail = extractValue(details.get(detail));
+            if (newDetail == null) continue;
+            String key = "item".equals(detail) ? "useItem" : convertToCamelCase(detail);
+            Object existing = attributesMap.get(key);
+            if (existing == null) {
+                attributesMap.put(key, newDetail);
+            } else {
+                List<Object> values = new ArrayList<>();
+                if (existing instanceof List<?> list) values.addAll(list);
+                else values.add(existing);
+                values.add(newDetail);
+                attributesMap.put(key, values);
             }
         }
+        Object trigger = details.get("trigger");
+        if (trigger instanceof Map<?, ?> t && "trade".equals(t.get("name"))) {
+            attributesMap.put("tradeSpecies", true);
+        }
         this.pokemonIdAndAttributesMap.put(Integer.parseInt((String) details.get("id")), attributesMap);
+    }
+
+    /**
+     * Api resources (held_item, location, ...) are maps with a name; everything else is used as is.
+     */
+    private Object extractValue(Object value)
+    {
+        if (value instanceof Map<?, ?> map) return map.get("name");
+        if (value instanceof String str && str.isEmpty()) return null;
+        return value;
     }
 
     /**
@@ -261,45 +294,37 @@ public class EvolvesHowController extends BaseController
     private void cleanupAttributesMap()
     {
         logger.info("All attributes maps created: {}", pokemonIdAndAttributesMap.size());
-        List<String> checkDetails = Arrays.asList("timeOfDay", "minHappiness", "minAffection",
-                "minBeauty", "knownMove", "knownMoveType", "needsRain", "turnUpsideDown");
+        List<String> checkDetails = Arrays.asList("minLevel", "heldItem", "useItem", "timeOfDay", "location",
+                "minHappiness", "minAffection", "minBeauty", "knownMove", "knownMoveType");
+        List<String> booleanDetails = Arrays.asList("needsRain", "turnUpsideDown");
         pokemonIdAndAttributesMap.forEach((key, mapValue) -> {
             logger.info("id {}", key);
             for (String detail : checkDetails) {
-                if ("timeOfDay".equals(detail)) {
-                    if (null != mapValue.get(detail) && mapValue.get(detail).equals(""))
-                        mapValue.put("timeOfDay", null);
-                } else {
-                    List<?> value = Arrays.asList(mapValue.get(detail));
-                    if ((value.size() > 1)
-                            || ("needsRain".equals(detail) || "turnUpsideDown".equals(detail))) {
-                        Set<Object> uniqueValues = new HashSet<>();
-                        for (Object v : value) {
-                            if (null != v && !uniqueValues.contains(v)) {
-                                uniqueValues.add(v);
-                                logger.debug("adding {} to uniqueValues", v);
-                            }
-                        }
-                        mapValue.put(detail, uniqueValues.stream().toList());
-
-                    }
-                }
-                if ("needsRain".equals(detail) || "turnUpsideDown".equals(detail)) {
-                    String bool = (null != mapValue.get(detail)) ?
-                            (!((List) mapValue.get(detail)).isEmpty()) ?
-                                    String.valueOf(((List) mapValue.get(detail)).get(0)) :
-                                    "false" :
-                            "false";
-                    if ("true".equals(bool)) {
-                        mapValue.put(detail, true);
-                    } else {
-                        mapValue.put(detail, false);
-                    }
-                }
-                logger.info("{}: {}", detail, mapValue.get(detail));
+                Object value = mapValue.get(detail);
+                Set<Object> uniqueValues = new LinkedHashSet<>();
+                if (value instanceof List<?> list) uniqueValues.addAll(list);
+                else if (value != null) uniqueValues.add(value);
+                uniqueValues.removeIf(v -> v == null || "".equals(v));
+                if (uniqueValues.isEmpty()) mapValue.put(detail, null);
+                else if (uniqueValues.size() == 1) mapValue.put(detail, uniqueValues.iterator().next());
+                else mapValue.put(detail, new ArrayList<>(uniqueValues));
             }
+            for (String detail : booleanDetails) {
+                mapValue.put(detail, isTrue(mapValue.get(detail)));
+            }
+            mapValue.put("tradeSpecies", isTrue(mapValue.get("tradeSpecies")));
         });
         logger.info("attribute map cleaned up");
+    }
+
+    /**
+     * True when the value is true, or is a list containing true
+     */
+    private boolean isTrue(Object value)
+    {
+        if (value instanceof List<?> list) return list.stream().anyMatch(this::isTrue);
+        if (value instanceof Boolean bool) return bool;
+        return value != null && "true".equalsIgnoreCase(String.valueOf(value));
     }
 
     private void setEvolvesBooleans(Map<String, Object> pokemonAttributesMap)
@@ -307,7 +332,7 @@ public class EvolvesHowController extends BaseController
         this.hasMinimumLevel = pokemonAttributesMap.get("minLevel") != null;
         this.hasHeldItem = pokemonAttributesMap.get("heldItem") != null;
         this.hasUseItem = pokemonAttributesMap.get("useItem") != null;
-        this.isABaby = pokemonAttributesMap.get("isBaby") != null && (Boolean) pokemonAttributesMap.get("isBaby");
+        this.isABaby = isTrue(pokemonAttributesMap.get("isBaby"));
         this.hasMinimumHappiness = pokemonAttributesMap.get("minHappiness") != null;
         this.hasDayNight = pokemonAttributesMap.get("timeOfDay") != null;
         this.hasLocations = pokemonAttributesMap.get("location") != null;
@@ -315,9 +340,9 @@ public class EvolvesHowController extends BaseController
         this.hasBeauty = pokemonAttributesMap.get("minBeauty") != null;
         this.hasKnownMoves = pokemonAttributesMap.get("knownMove") != null;
         this.hasKnownMoveType = pokemonAttributesMap.get("knownMoveType") != null;
-        this.hasNeedsRain = pokemonAttributesMap.get("needsRain") != null && (Boolean) pokemonAttributesMap.get("needsRain");
-        this.hasTurnUpsideDown = pokemonAttributesMap.get("turnUpsideDown") != null && (Boolean) pokemonAttributesMap.get("turnUpsideDown");
-        this.hasTradeSpecies = pokemonAttributesMap.get("tradeSpecies") != null && (Boolean) pokemonAttributesMap.get("tradeSpecies");
+        this.hasNeedsRain = isTrue(pokemonAttributesMap.get("needsRain"));
+        this.hasTurnUpsideDown = isTrue(pokemonAttributesMap.get("turnUpsideDown"));
+        this.hasTradeSpecies = isTrue(pokemonAttributesMap.get("tradeSpecies"));
     }
 
     /**
