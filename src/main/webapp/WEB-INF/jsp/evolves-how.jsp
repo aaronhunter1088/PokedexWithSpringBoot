@@ -57,8 +57,8 @@
                 </c:if> <!-- with time of day -->
                 <c:if test="${hasLocations}">
                     <h3 id="locationsTitle" class="listStyle"><b>Evolves at location: </b></h3>
-                    <c:forEach var="location" items="${attributesMap.get('location')}">
-                        <h3 id="location{{i+1}}" class="listStyle">${location}</h3>
+                    <c:forEach var="location" items="${attributesMap.get('location')}" varStatus="st">
+                        <h3 id="location${st.count}" class="listStyle">${location}</h3>
                     </c:forEach>
                 </c:if> <!-- with locations -->
                 <c:if test="${hasKnownMoves}">
@@ -69,8 +69,8 @@
                 </c:if> <!-- with known moves -->
                 <c:if test="${hasKnownMoveType}">
                     <h3 id="knownMovesTypesTitle" class="listStyle"><b>Evolves with move type: </b></h3>
-                    <c:forEach var="moveType" items="${attributesMap.get('knownMoveType')}">
-                        <h3 id="knownMoveType{{i+1}}" class="listStyle">${moveType}</h3>
+                    <c:forEach var="moveType" items="${attributesMap.get('knownMoveType')}" varStatus="st">
+                        <h3 id="knownMoveType${st.count}" class="listStyle">${moveType}</h3>
                     </c:forEach>
                 </c:if> <!-- with known moves types -->
                 <c:if test="${hasNeedsRain}">
