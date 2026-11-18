@@ -3,6 +3,9 @@
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/Pokedex-Manager/actions/workflows/deploy-pokedex-springboot.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/Pokedex-Manager/actions/workflows/deploy-pokedex-springboot.yml) [![Dependabot Updates](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates)
 
+# v1.10.3
+This version updates the Evolves-How functionality to properly display the evolutions information.
+
 # v1.10.2
 This version updates dependencies and removes some duplicate properties. It also fixes an issue with the mobile search
 function not working, now fixed.
