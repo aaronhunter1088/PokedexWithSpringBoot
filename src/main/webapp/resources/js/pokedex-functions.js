@@ -3,11 +3,21 @@ let pokemon = {}, sprites = {};
 let locations = [], moves = [];
 let desc = "", color = "";
 
+/**
+ * Logs a message indicating the page from which the function was called.
+ * @param pageName the name of the page from which the function was called
+ */
 function logFromWhere(pageName) {
     console.log("Test function called from " + pageName);
 
 }
 
+/**
+ * Applies the dark mode state to the theme toggle button
+ * based on the given isDark parameter.
+ * @param themeToggle the theme toggle button element
+ * @param isDark true to apply dark mode, false for light mode
+ */
 function applyThemeToggleState(themeToggle, isDark) {
     if (!themeToggle) {
         return;
@@ -24,6 +34,10 @@ function applyThemeToggleState(themeToggle, isDark) {
     moonIcon.style.pointerEvents = isDark ? "auto" : "none";
 }
 
+/**
+ * Synchronizes the state of the theme toggle buttons with the
+ * current dark mode state of the body.
+ */
 function syncThemeTogglesWithBody() {
     const isDark = document.body.classList.contains("darkmode");
     applyThemeToggleState(document.getElementById("themeToggle"), isDark);
@@ -31,6 +45,11 @@ function syncThemeTogglesWithBody() {
     $(".mobile-darkmode-label").text(isDark ? "Dark Mode" : "Light Mode");
 }
 
+/**
+ * Applies the dark mode state to the body and other relevant
+ * elements based on the given isDark parameter.
+ * @param isDark true to apply dark mode, false for light mode
+ */
 function applyDarkmodeState(isDark) {
     const $body = $("body");
     $body.toggleClass("dark darkmode", isDark);
@@ -44,6 +63,7 @@ function applyDarkmodeState(isDark) {
     syncThemeTogglesWithBody();
 }
 
+// TBR
 function toggleGifPlayback(imageElement) {
     if (!imageElement) {
         return;
@@ -56,6 +76,12 @@ function toggleGifPlayback(imageElement) {
     imageElement.dataset.playing = (!isPlaying).toString();
 }
 
+/**
+ * Sets the GIF preview state for the given preview
+ * element based on the showGifs parameter.
+ * @param previewId the ID of the preview element
+ * @param showGifs true to show GIFs, false to hide them
+ */
 function setGifPreviewState(previewId, showGifs) {
     const gifPreviewToggle = document.getElementById(previewId);
     if (!gifPreviewToggle) {
@@ -121,11 +147,10 @@ function syncGifState(showGifs) {
     closeMobileMenu();
 }
 
-// TBR
-// function handleGifPreviewClick() {
-//     toggleGifs();
-// }
-
+/**
+ * Clears the query parameters related to dark mode
+ * and tile color from the homepage URL.
+ */
 function clearHomepageQueryParams() {
     const currentUrl = new URL(window.location.href);
     if (!currentUrl.searchParams.has('darkmode') && !currentUrl.searchParams.has('tileColor')) {
@@ -136,12 +161,26 @@ function clearHomepageQueryParams() {
     window.history.replaceState({}, document.title, cleanUrl);
 }
 
+/**
+ * Sets the number of Pokémon to display per page based on the value selected in the
+ * dropdown menu with the ID "showPkmnNumber". If the value is not empty, it calls
+ * setPkmnPerPageImpl with the selected value and false for the isMobile parameter.
+ */
 function setPkmnPerPage() {
     let value = $("#showPkmnNumber").val();
     if (value === '') return;
     setPkmnPerPageImpl(value, false);
 }
 
+/**
+ * Sets the number of Pokémon to display per page and reloads the page.
+ * It sends an AJAX request to the server with the specified value and
+ * handles the response accordingly. If the request is successful, it
+ * reloads the page and clears any query parameters related to dark mode
+ * or tile color from the homepage URL.
+ * @param value the number of Pokémon to display per page
+ * @param isMobile true if the request is made from a mobile device, false otherwise
+ */
 function setPkmnPerPageImpl(value, isMobile) {
     console.log("showPkmnNumber: " + value);
     $.ajax({
@@ -173,6 +212,12 @@ function setPkmnPerPageImpl(value, isMobile) {
     });
 }
 
+/**
+ * Toggles the GIF display state of the application. It sends an AJAX request to the
+ * server to update the user's preference and then updates the UI accordingly. The
+ * function also clears any query parameters related to dark mode or tile color from
+ * the homepage URL.
+ */
 function toggleGifs() {
     $.ajax({
         type: "GET",
@@ -198,6 +243,12 @@ function toggleGifs() {
     }, 500);
 }
 
+/**
+ * Toggles the dark mode state of the application. It updates the body's class list,
+ * synchronizes the theme toggles, and sends an AJAX request to save the user's
+ * preference on the server. The function also handles the animation of the sun and
+ * moon icons in the theme toggle button.
+ */
 function toggleDarkmode() {
     let isDarkMode = document.body.classList.contains("darkmode");
 
@@ -243,6 +294,10 @@ function toggleDarkmode() {
     }, 1000);
 }
 
+/**
+ * Updates the GIF toggle state based on the provided data and synchronizes the UI accordingly.
+ * @param data the response from /toggleGifs or from window.pokedexConfig.showGifs
+ */
 function updateGifToggle(data) {
     let showGifs;
     try {
@@ -258,8 +313,29 @@ function updateGifToggle(data) {
     $("#gifSwitchMobile").prop("checked", showGifs);
     window.pokedexConfig.showGifs = showGifs;
     syncGifState(showGifs);
+    if (showGifs === false && isBold("#gifImgBtn")) {
+        $("#defaultImgBtn").trigger("click");
+    } else if (showGifs === true && isBold("#defaultImgBtn")
+            && $("#gifImgBtn").length && !$("#gifImgBtn").attr("onclick").includes("'gif', ''")) {
+        $("#gifImgBtn").trigger("click");
+    }
 }
 
+/**
+ * Checks if the font weight of the element specified by the selector is bold.
+ * @param selector A jQuery selector string for the element to check.
+ * @returns {boolean} true if the font weight is bold, false otherwise.
+ */
+function isBold(selector) {
+    const weight = $(selector).css('font-weight');
+    return weight === 'bold' || Number.parseInt(weight) >= 700;
+}
+
+/**
+ * Changes the background color based on the given Pokémon color.
+ * @param pokemonColor The color of the Pokémon (e.g., "red", "yellow", "green", etc.).
+ * @returns {string} the corresponding hex color code for the background.
+ */
 function changeColor(pokemonColor) {
     console.log('changeColor: ' + pokemonColor);
     if (pokemonColor === "red") { return "#FA8072"; }
@@ -275,10 +351,18 @@ function changeColor(pokemonColor) {
     else return "#ffffff";
 }
 
+/**
+ * Updates the source of the given image tag to display the specified artwork.
+ * @param imgTag the image tag element to update
+ * @param artwork the URL of the artwork to display
+ */
 function showArtwork(imgTag, artwork) {
     imgTag.src = artwork;
 }
 
+/**
+ * Searches for a Pokémon by name or ID and navigates to its page if found.
+ */
 function searchForPkmn() {
     let nameOrId = ($("#search").val() || "").trim();
 
@@ -324,6 +408,10 @@ function searchForPkmn() {
     });
 }
 
+/**
+ * Sets the page number to view and reloads the page with the specified page number.
+ * @param pageNumber the page number to view
+ */
 function setPageToView(pageNumber) {
     //let value = pageNumber;
     if (pageNumber === '') return;
@@ -356,6 +444,11 @@ function setPageToView(pageNumber) {
     //window.location.href = window.pokedexConfig.contextPath + "/page?pageNumber=" + encodeURIComponent(value);
 }
 
+/**
+ * To be implemented.
+ * Searches for Pokémon by type and navigates to the homepage with the selected type.
+ * @param selectObject the select element containing the chosen type
+ */
 function getByPkmnType(selectObject) {
     let type = selectObject.value;
 
@@ -396,6 +489,11 @@ function getByPkmnType(selectObject) {
     console.log(type);
 }
 
+/**
+ * To be implemented with getByPkmnType.
+ * Displays a loading overlay with a message indicating that Pokémon of the selected type are being fetched.
+ * @param selectedType the type of Pokémon being fetched
+ */
 function showLoadingOverlay(selectedType) {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
@@ -409,6 +507,10 @@ function showLoadingOverlay(selectedType) {
     }
 }
 
+/**
+ * To be implemented with getByPkmnType.
+ * Hides the loading overlay.
+ */
 function hideLoadingOverlay() {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
@@ -416,6 +518,9 @@ function hideLoadingOverlay() {
     }
 }
 
+/**
+ * Navigates to the landing page of the application, preserving the current dark mode state in the URL parameters.
+ */
 function navigateToLandingPage() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const currentDarkMode = document.body.classList.contains("darkmode");
@@ -429,6 +534,7 @@ function navigateToLandingPage() {
     window.location.href = url;
 }
 
+// TBR
 function loadPokedexPageAjax(url) {
     $.ajax({
         type: "GET",
@@ -452,10 +558,7 @@ function loadPokedexPageAjax(url) {
     });
 }
 
-//let pokemon = {}, sprites = {};
-//let locations = [], moves = [];
-//let desc = "", color = "";
-// Actions performed when you click "Get Info"
+// TBR
 function getPokemonInfo() {
     let name = $('#nameOrId').val();
     name = name.toLowerCase().trim();
@@ -476,7 +579,8 @@ function getPokemonInfo() {
         // // setTabDivDefaults();
     }
 }
-// Ajax to get Pokemon
+
+// TBR. Not used. Referenced in getPokemonInfo().
 function getPokemon(name) {
     pokemon = $.ajax({
         type: "GET",
@@ -489,7 +593,8 @@ function getPokemon(name) {
     });
     return pokemon.responseText;
 }
-// Ajax to get Moves
+
+// TBR
 function getMoves() {
     moves = JSON.parse(pokemon)["moves"];
     //console.log(moves.length + " before moves text adding")
@@ -503,7 +608,8 @@ function getMoves() {
     moves = moveNames.sort();
     return moves;
 }
-// Ajax to get Locations
+
+// TBR
 function getLocations(name) {
     $.ajax({
         type: "GET",
@@ -530,7 +636,8 @@ function getLocations(name) {
     });
     return locations.sort();
 }
-// Ajax to get Description text
+
+// TBR
 function getPokemonDescriptionText(name) {
     desc = $.ajax({
         headers: {
@@ -548,7 +655,12 @@ function getPokemonDescriptionText(name) {
     });
     return desc.responseText;
 }
-// Flips between regular and shiny images
+
+/**
+ * Updates the displayed Pokémon image based on the selected type and provided image URL.
+ * @param type the type of image to display ('default', 'official', 'shiny', or 'gif')
+ * @param image the URL of the image to display; if empty, a default Pokéball image will be used
+ */
 function showImage(type, image) {
     let photoEle = $("#pkmnImage");
     switch (type) {
@@ -601,7 +713,8 @@ function showImage(type, image) {
     photoEle.prop("src", image);
     photoEle.show();
 }
-// Ajax to get the color of the Pokemon
+
+// TBR
 function setBackgroundAndGetColor(name) {
     $.ajax({
         type: "GET",
@@ -631,7 +744,8 @@ function setBackgroundAndGetColor(name) {
     //console.log("color after: " + color);
     return color;
 }
-// Sets the text fields
+
+// TBR
 function setupPokedex() {
     pokemon = JSON.parse(pokemon);
     console.log("pkmn: " + pokemon);
@@ -666,7 +780,13 @@ function setupPokedex() {
         $('#movesDiv').append("<h3 id=\"moves"+i+"\">"+moves[i]+"</h3>");
     }
 }
-// Determines if the input is valid or not
+
+/**
+ * TBR
+ * Checks if the given Pokémon name is valid by making a synchronous AJAX request to the server.
+ * @param name the name of the Pokémon to validate
+ * @returns {boolean} true if the name is valid, false otherwise
+ */
 function isNameValid(name) {
     let result = false;
     $.ajax({
@@ -686,7 +806,8 @@ function isNameValid(name) {
     });
     return result;
 }
-// Shows the div based on the tab click
+
+// TBR
 function showDivAndBoldText(div) {
     if (div === "descriptionDiv") {
         $('#descriptionDiv').show();
@@ -729,14 +850,16 @@ function showDivAndBoldText(div) {
     //     $('#berriesTabBtn').css('font-weight', 'bold')
     // }
 }
-// Default setting for button weights
+
+// TBR
 function setButtonWeightDefaults()  {
     $('#descTabBtn').css('font-weight', 'bold');
     $('#locTabBtn').css('font-weight', 'normal');
     $('#movesTabBtn').css('font-weight', 'normal');
     //$('#berriesTabBtn').css('font-weight', 'normal');
 }
-// Default setting for tab visuals
+
+// TBR
 function setTabDivDefaults() {
     $('#descriptionDiv').show();
     $('#locationsDiv').hide();
@@ -744,6 +867,10 @@ function setTabDivDefaults() {
     //$('#berriesDiv').hide();
 }
 
+/**
+ * Resets the visibility and font weight of all information divs
+ * and their corresponding buttons to the default state.
+ */
 function defaultInfoDivs() {
     $("#descriptionDiv").hide();
     $("#descriptionBtn").css('font-weight', 'normal');
@@ -755,6 +882,12 @@ function defaultInfoDivs() {
     $("#evolvesHowBtn").css('font-weight', 'normal');
 }
 
+/**
+ * Shows the specified information div and sets the
+ * corresponding button's font weight to bold.
+ * @param divName the name of the div to show ('description', 'locations', 'moves', or 'evolvesHow')
+ * @param pokemonId the ID of the Pokémon for which to fetch evolution information (used when divName is 'evolvesHow')
+ */
 function showDiv(divName, pokemonId) {
     defaultInfoDivs();
     switch (divName) {
@@ -808,6 +941,10 @@ function showDiv(divName, pokemonId) {
     }
 }
 
+/**
+ * Fetches and displays the evolution information for the specified Pokémon ID in the "evolutions" div.
+ * @param pokemonId the ID of the Pokémon for which to fetch evolution information
+ */
 function setEvolutionsDiv(pokemonId) {
     let response = $.ajax({
         type: "GET",
@@ -848,6 +985,13 @@ function setEvolutionsDiv(pokemonId) {
     }
 }
 
+/**
+ * Updates the background color of each Pokémon box in the "evolutions"
+ * div based on its current background color. This function iterates
+ * through each Pokémon box, retrieves its current background color,
+ * and changes it using the changeColor function.
+ * It also logs the ID of each updated Pokémon box to the console.
+ */
 function updateEvolutionsDiv() {
     let pokemonDivs = $("#evolutions div div a div.box");
     pokemonDivs.each((index, div) => {
@@ -859,6 +1003,13 @@ function updateEvolutionsDiv() {
 // Mobile functions
 
 let mobileMenuCloseTimeoutId;
+
+/**
+ * Toggles the visibility of the mobile menu. If the menu is currently open,
+ * it will be closed; if it is closed, it will be opened. The function also
+ * manages the body's overflow style to prevent scrolling when the menu is
+ * open.
+ */
 function toggleMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     const overlay = document.getElementById('mobileMenuOverlay');
@@ -879,6 +1030,13 @@ function toggleMobileMenu() {
     }
 }
 
+/**
+ * Closes the mobile menu if it is currently open. The function adds a "closing"
+ * class to the menu and overlay elements, which can be used for CSS animations.
+ * After a delay of 1 second (1000 milliseconds), the "active" and "closing"
+ * classes are removed, and the body's overflow style is reset to allow scrolling
+ * again.
+ */
 function closeMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     const overlay = document.getElementById('mobileMenuOverlay');
@@ -896,6 +1054,13 @@ function closeMobileMenu() {
     }, 1000);
 }
 
+/**
+ * Synchronizes the theme of the mobile header and menu with the current theme of the
+ * body element. If the isDarkOverride parameter is provided, it will be used to
+ * determine the theme; otherwise, the function will check the body's class list for
+ * the "darkmode" class.
+ * @param isDarkOverride
+ */
 function syncMobileHeaderThemeFromBody(isDarkOverride) {
     const isDark = typeof isDarkOverride === "boolean"
         ? isDarkOverride
