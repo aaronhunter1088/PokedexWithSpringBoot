@@ -56,22 +56,32 @@ function toggleGifPlayback(imageElement) {
     imageElement.dataset.playing = (!isPlaying).toString();
 }
 
-function syncGifPreviewState(showGifsEnabled) {
-    showGifsEnabled = showGifsEnabled === true || showGifsEnabled === "true";
-    const gifPreviewToggle = document.getElementById("gifPreviewToggle");
+function setGifPreviewState(previewId, showGifs) {
+    const gifPreviewToggle = document.getElementById(previewId);
     if (!gifPreviewToggle) {
         return;
     }
-    gifPreviewToggle.src = showGifsEnabled
+    gifPreviewToggle.src = showGifs
         ? gifPreviewToggle.dataset.animatedSrc
         : gifPreviewToggle.dataset.pausedSrc;
-    gifPreviewToggle.dataset.playing = showGifsEnabled.toString();
-    gifPreviewToggle.style.transform = showGifsEnabled
+    gifPreviewToggle.dataset.playing = showGifs;
+    gifPreviewToggle.style.transform = showGifs
         ? "translate(-50%, -50%) scale(1)"
         : "translate(-50%, -50%) scale(" + (gifPreviewToggle.dataset.pausedScale || "1") + ")";
 }
 
-function applyGifModeToGrid(showGifsEnabled) {
+/**
+ * Syncs every GIF-related UI element (desktop and mobile previews, mobile label,
+ * and the Pokemon grid images) to the given state.
+ * @param showGifs true to show GIFs, anything else to hide them
+ */
+function syncGifState(showGifs) {
+    setGifPreviewState("gifPreviewToggle", showGifs);
+    setGifPreviewState("gifPreviewToggleMobile", showGifs);
+    const gifToggleLabel = document.getElementById("mobileGifToggleLabel");
+    if (gifToggleLabel) {
+        gifToggleLabel.textContent = showGifs ? "Hide GIFs" : "Show GIFs";
+    }
     document.querySelectorAll(".pokemon-grid-image").forEach(function(imageElement) {
         const hasDefaultImage = imageElement.dataset.defaultImagePresent === "true";
         const hasGifImage = imageElement.dataset.gifImagePresent === "true";
@@ -84,7 +94,7 @@ function applyGifModeToGrid(showGifsEnabled) {
         imageElement.onmouseover = null;
         imageElement.onmouseout = null;
 
-        if (showGifsEnabled) {
+        if (showGifs) {
             if (hasDefaultImage && hasGifImage && gifSrc) {
                 imageElement.src = gifSrc;
             } else if (officialSrc) {
@@ -243,14 +253,11 @@ function updateGifToggle(data) {
     } catch (error) {
         showGifs = data;
     }
-    const showGifsEnabled = showGifs === true || showGifs === "true";
-    console.log("showGifs: " + showGifsEnabled);
-    $("#gifSwitch").prop("checked", showGifsEnabled);
-    $("#gifSwitchMobile").prop("checked", showGifsEnabled);
-    window.pokedexConfig.showGifs = showGifsEnabled;
-    syncGifPreviewState(showGifsEnabled);
-    syncMobileGifPreviewState(showGifsEnabled);
-    applyGifModeToGrid(showGifsEnabled);
+    console.log("showGifs: " + showGifs);
+    $("#gifSwitch").prop("checked", showGifs);
+    $("#gifSwitchMobile").prop("checked", showGifs);
+    window.pokedexConfig.showGifs = showGifs;
+    syncGifState(showGifs);
 }
 
 function changeColor(pokemonColor) {
@@ -887,25 +894,6 @@ function closeMobileMenu() {
         overlay.classList.remove('active', 'closing');
         document.body.style.overflow = '';
     }, 1000);
-}
-
-function syncMobileGifPreviewState(showGifsEnabled) {
-    showGifsEnabled = showGifsEnabled === true || showGifsEnabled === "true";
-    const gifPreviewToggle = document.getElementById("gifPreviewToggleMobile");
-    const gifToggleLabel = document.getElementById("mobileGifToggleLabel");
-    if (!gifPreviewToggle) {
-        return;
-    }
-    gifPreviewToggle.src = showGifsEnabled
-        ? gifPreviewToggle.dataset.animatedSrc
-        : gifPreviewToggle.dataset.pausedSrc;
-    gifPreviewToggle.dataset.playing = showGifsEnabled.toString();
-    gifPreviewToggle.style.transform = showGifsEnabled
-        ? "translate(-50%, -50%) scale(1)"
-        : "translate(-50%, -50%) scale(" + (gifPreviewToggle.dataset.pausedScale || "1") + ")";
-    if (gifToggleLabel) {
-        gifToggleLabel.textContent = showGifsEnabled ? "Hide GIFs" : "Show GIFs";
-    }
 }
 
 function syncMobileHeaderThemeFromBody(isDarkOverride) {
