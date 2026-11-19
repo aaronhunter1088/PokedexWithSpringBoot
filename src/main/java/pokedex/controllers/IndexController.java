@@ -157,6 +157,7 @@ public class IndexController extends BaseController
     public ResponseEntity<String> getPokemonPerPage(@RequestParam(name = "pkmnPerPage", required = false, defaultValue = "10") int pkmnPerPage,
                                                      HttpSession httpSession)
     {
+        final int firstVisibleIndex = (page - 1) * this.pkmnPerPage;
         if (pkmnPerPage <= 0) {
             return ResponseEntity.badRequest().body("Invalid number of Pokemon per page");
         } else {
@@ -169,8 +170,9 @@ public class IndexController extends BaseController
         }
         // Clear pokemon map to force reload with new page size
         this.pokemonMap.clear();
-        // Reset page to 1
-        this.page = 1;
+        // Keep the first visible Pokemon on screen by recalculating the page for the new size
+        final int lastPage = Math.max(1, (int) Math.ceil((double) totalPokemon / this.pkmnPerPage));
+        this.page = Math.min(lastPage, firstVisibleIndex / this.pkmnPerPage + 1);
         // Clear session cache when Pokemon per page changes
         httpSession.removeAttribute("pokemonMap");
         LOGGER.info("pkmnPerPage updated to: {}", pkmnPerPage);
