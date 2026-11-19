@@ -144,7 +144,6 @@ function syncGifState(showGifs) {
 
         imageElement.src = officialSrc || fallbackSrc;
     });
-    closeMobileMenu();
 }
 
 /**
@@ -240,7 +239,7 @@ function toggleGifs() {
     });
     setTimeout(() => {
         closeMobileMenu();
-    }, 500);
+    }, 1000);
 }
 
 /**
