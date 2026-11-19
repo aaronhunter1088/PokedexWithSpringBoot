@@ -13,7 +13,7 @@
     </c:when>
     <c:when test="${pokemonFamily != null}">
         <h2>${pokemonName}'s Family</h2>
-        <div id="evolutions" class="evolution-grid">
+        <div id="evolutions" style="display:inline-flex; justify-content: center; width:100%; height:45%;">
             <c:forEach var="pokemonList" items="${pokemonFamily}" varStatus="status">
                 <c:set var="listNumber" value="${status.count}"/>
                 <div style="display:block;">
