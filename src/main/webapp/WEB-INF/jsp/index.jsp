@@ -146,7 +146,7 @@
                          alt="pikachu gif preview"
                          title="If GIF is not present, official artwork will show and if still nothing, a Pokeball."
                          style="cursor:pointer;width:50px;height:50px;object-fit:contain;position:absolute;top:50%;left:50%;display:block;"
-                         onclick="handleGifPreviewClick();">
+                         onclick="toggleGifs();">
                 </div>
                 &emsp;
                 <div id="themeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
@@ -286,7 +286,7 @@
         $(function() {
             logFromWhere('index');
             clearHomepageQueryParams();
-            updateGifToggle(false);
+            updateGifToggle(window.pokedexConfig.showGifs);
 
             let ids = "${pokemonIds}".replace(/[\[\]]/g, '').split(',').map(id => id.trim());
             for(let i=0; i<ids.length; i++) {

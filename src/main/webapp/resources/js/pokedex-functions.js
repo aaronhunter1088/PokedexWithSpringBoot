@@ -57,6 +57,7 @@ function toggleGifPlayback(imageElement) {
 }
 
 function syncGifPreviewState(showGifsEnabled) {
+    showGifsEnabled = showGifsEnabled === true || showGifsEnabled === "true";
     const gifPreviewToggle = document.getElementById("gifPreviewToggle");
     if (!gifPreviewToggle) {
         return;
@@ -110,9 +111,10 @@ function applyGifModeToGrid(showGifsEnabled) {
     closeMobileMenu();
 }
 
-function handleGifPreviewClick() {
-    toggleGifs();
-}
+// TBR
+// function handleGifPreviewClick() {
+//     toggleGifs();
+// }
 
 function clearHomepageQueryParams() {
     const currentUrl = new URL(window.location.href);
@@ -234,7 +236,10 @@ function toggleDarkmode() {
 function updateGifToggle(data) {
     let showGifs;
     try {
-        showGifs = JSON.parse(data.responseText);
+        if (data.responseText)
+            showGifs = JSON.parse(data.responseText);
+        else
+            showGifs = data;
     } catch (error) {
         showGifs = data;
     }
@@ -242,6 +247,7 @@ function updateGifToggle(data) {
     console.log("showGifs: " + showGifsEnabled);
     $("#gifSwitch").prop("checked", showGifsEnabled);
     $("#gifSwitchMobile").prop("checked", showGifsEnabled);
+    window.pokedexConfig.showGifs = showGifsEnabled;
     syncGifPreviewState(showGifsEnabled);
     syncMobileGifPreviewState(showGifsEnabled);
     applyGifModeToGrid(showGifsEnabled);
@@ -843,10 +849,6 @@ function updateEvolutionsDiv() {
     });
 }
 
-// function navigateToHomePage() {
-//     window.location.href = '${pageContext.request.contextPath}/';
-// }
-
 // Mobile functions
 
 let mobileMenuCloseTimeoutId;
@@ -888,6 +890,7 @@ function closeMobileMenu() {
 }
 
 function syncMobileGifPreviewState(showGifsEnabled) {
+    showGifsEnabled = showGifsEnabled === true || showGifsEnabled === "true";
     const gifPreviewToggle = document.getElementById("gifPreviewToggleMobile");
     const gifToggleLabel = document.getElementById("mobileGifToggleLabel");
     if (!gifPreviewToggle) {

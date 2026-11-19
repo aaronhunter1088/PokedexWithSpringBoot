@@ -17,12 +17,11 @@ public class GifService
      */
     public void setShowGifs(boolean showGifs) {
         this.showGifs = showGifs;
-        //this.applyDarkModeToBody();
     }
 
     /**
      * Get the current dark mode state
-     * @returns current dark mode state
+     * @return current dark mode state
      */
     public boolean isShowGifs() {
         return showGifs;

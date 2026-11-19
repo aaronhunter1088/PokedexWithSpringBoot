@@ -3,8 +3,8 @@
     window.pokedexConfig = {
         contextPath: "${pageContext.request.contextPath}",
         env: "${env}",
-        isDarkMode: "${isDarkMode}",
-        showGifs: "${showGifs}"
+        isDarkMode: ${isDarkMode},
+        showGifs: ${showGifs}
     };
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

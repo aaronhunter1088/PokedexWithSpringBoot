@@ -33,7 +33,7 @@
                  alt="pikachu gif preview"
                  title="If GIF is not present, official artwork will show! Click to toggle GIFs."
                  style="cursor:pointer;width:50px;height:50px;object-fit:contain;position:absolute;top:50%;left:50%;display:block;"
-                 onclick="handleGifPreviewClick();">
+                 onclick="toggleGifs();">
         </div>
     </div>
 
