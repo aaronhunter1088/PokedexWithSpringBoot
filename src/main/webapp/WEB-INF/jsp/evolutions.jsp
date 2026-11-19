@@ -13,7 +13,7 @@
     </c:when>
     <c:when test="${pokemonFamily != null}">
         <h2>${pokemonName}'s Family</h2>
-        <div id="evolutions" style="display:inline-flex; justify-content: center; width:100%; height:45%;">
+        <div id="evolutions" class="evolution-grid">
             <c:forEach var="pokemonList" items="${pokemonFamily}" varStatus="status">
                 <c:set var="listNumber" value="${status.count}"/>
                 <div style="display:block;">
@@ -45,7 +45,7 @@
                                     </div>
                                 </a>
                                 <c:if test="${!status.last}">
-                                    <div style="padding-top:25px; text-align:center; justify-content:center;">
+                                    <div style="padding-top:20px; padding-bottom:10px; text-align:center; justify-content:center;">
                                         <img style="width:25px;height:25px;" alt="pokeball"
                                              src="${pageContext.request.contextPath}/images/pokeball_search.png">
                                     </div>
