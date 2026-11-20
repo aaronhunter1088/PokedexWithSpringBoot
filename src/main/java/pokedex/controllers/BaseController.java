@@ -30,10 +30,6 @@ public class BaseController
 {
     /* Logging instance */
     private static final Logger LOGGER = LogManager.getLogger(BaseController.class);
-    private static final int WAIT_INTERVAL_MS = 100; // Time to wait between checks for filtered Pokemon
-    private static final int MAX_WAIT_ITERATIONS = 30; // Max iterations to wait (30 * 100ms = 3 seconds)
-    private static final int TIMEOUT_MULTIPLIER = 20; // Multiplier for extended timeout (20 * 3s = 60 seconds)
-    private static final int PROGRESS_LOG_INTERVAL = 50; // Log progress every 50 iterations (5 seconds)
     private static final int FILTER_FETCH_PAGE_SIZE = 50; // Pokemon fetched per request while filtering by type
     @Value("${fetch.max.attempts:3}")
     private int HOMEPAGE_FETCH_MAX_ATTEMPTS;
@@ -106,6 +102,16 @@ public class BaseController
     }
 
     /**
+     * Gets the species color name, defaulting to white.
+     * @param speciesData from pokeapi-reactor, may be null
+     * @return the color name
+     */
+    private static String getColorName(final PokemonSpecies speciesData)
+    {
+        return speciesData != null && speciesData.getColor() != null ? speciesData.getColor().name() : "white";
+    }
+
+    /**
      * Returns a Pokemon with application specific properties
      * @param pokemon from pokeapi-reactor
      * @param speciesData from pokeapi-reactor
@@ -164,7 +170,7 @@ public class BaseController
                 "officialImage", officialImage,
                 "gifImage", gifImage,
                 "shinyImage", shinyImage,
-                "color", speciesData.getColor() != null ? speciesData.getColor().name() : "white",
+                "color", getColorName(speciesData),
                 "descriptions", pokemonDescriptions,
                 "description", description,
                 "type", typeString,
@@ -253,7 +259,6 @@ public class BaseController
                         LOGGER.warn("Skipping {} — getPokemonByIdOrName returned null (API may not be ready yet)", pkmn.name());
                         return;
                     }
-                    String color = "white";
                     PokemonSpecies speciesData = null;
                     try {
                         speciesData = pokemonService.getPokemonSpeciesData(pokemon.id().toString());
@@ -423,13 +428,9 @@ public class BaseController
 
                         if (hasType) {
                             // Get species data for color
-                            String color = "white";
                             PokemonSpecies speciesData = null;
                             try {
                                 speciesData = pokemonService.getPokemonSpeciesData(pokemon.id().toString());
-                                if (speciesData != null && speciesData.getColor() != null) {
-                                    color = speciesData.getColor().name();
-                                }
                             } catch (Exception e) {
                                 LOGGER.error("No speciesData found for pokemon id: {}", pokemon.id());
                             }
@@ -452,7 +453,7 @@ public class BaseController
                                     "defaultImage", sprites.getFrontDefault(),
                                     "officialImage", OFFICIAL_IMAGE_URL(pokemon.id()),
                                     "gifImage", GIF_IMAGE_URL(pokemon.id()),
-                                    "color", color,
+                                    "color", getColorName(speciesData),
                                     "flavorTexts", speciesData != null ? speciesData.getFlavorTextEntries() : new ArrayList<>(),
                                     "descriptions", speciesData != null ? speciesData.getFlavorTextEntries() : new ArrayList<>(),
                                     "description", speciesData != null && !speciesData.getFlavorTextEntries().isEmpty()
