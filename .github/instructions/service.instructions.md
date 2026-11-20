@@ -8,6 +8,6 @@ Apply these instructions when adding or editing service classes in the project.
 - Follow the existing state-holder pattern used by `DarkmodeService` and `GifService`: a single boolean field, a setter, a getter, and a toggle method when needed.
 - Keep service methods small and explicit; avoid adding controller responsibilities or view logic.
 - Annotate services that store per-user state (like `DarkmodeService` and `GifService`) with `@SessionScope` so visitors never share state. Avoid storing per-user state in singleton beans or controller fields.
-- Use clear method names aligned with the stored flag (`setDarkmode` / `isDarkmode` / `toggleDarkMode`, `setShowGifs` / `isShowGifs` / `toggleShowGifs`).
+- Use clear method names aligned with the stored flag (`setDarkmode` / `isDarkmode` / `toggleDarkmode`, `setShowGifs` / `isShowGifs` / `toggleShowGifs`).
 - Keep Javadoc concise and match existing comment style when documenting simple accessors or toggles.
 - Maintain existing package naming and file organization conventions in the `pokedex.services` code.

@@ -137,7 +137,7 @@ public class IndexController extends BaseController
             HttpSession httpSession)
     {
         if (requestedDarkmode == null) {
-            darkmodeService.toggleDarkMode();
+            darkmodeService.toggleDarkmode();
         } else {
             darkmodeService.setDarkmode(requestedDarkmode);
         }
