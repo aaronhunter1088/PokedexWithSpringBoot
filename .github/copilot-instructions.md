@@ -19,7 +19,7 @@ This is a Spring Boot-based Pokédex web application that displays Pokémon info
   - `PokedexApplication.java`: Spring Boot application entry point
   - `controllers/`: Spring MVC controllers for handling web requests
 - `src/main/resources/`: Configuration files
-  - `application.properties`: Main application configuration
+  - `pokedexapi.properties`: Main application configuration
   - `application-*.properties`: Environment-specific configurations
   - `log4j2.properties`: Logging configuration
 - `src/main/webapp/`: Web application resources
