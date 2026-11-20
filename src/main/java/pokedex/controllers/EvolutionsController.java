@@ -33,12 +33,9 @@ public class EvolutionsController extends BaseController
     List<List<Integer>> pokemonFamilyIDs;
     List<Integer> allIDs;
     List<List<Pokemon>> pokemonFamily;
-    List<Integer> pokemonFamilyAltLevels;
-    Map<String, Object> specificAttributesMap;
-    Integer pokemonFamilySize;
+    Integer pokemonFamilySize = 0;
     List<Integer> stages;
     Integer stage = 0;
-    Integer counter = 0;
 
     @Autowired
     public EvolutionsController(PokemonApiService pokemonService,
@@ -54,8 +51,7 @@ public class EvolutionsController extends BaseController
     public ModelAndView getEvolutions(@PathVariable String pokemonId, ModelAndView mav,
                                       @RequestParam(name = "darkmode", required = false, defaultValue = "false") String darkmode)
     {
-        //updateSessionMap();
-        resetEvolutionParameters();
+        pokemonIDToEvolutionChainMap = pokemonService.getEvolutionsMap();
         this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, pokemonId);
         setupEvolutions();
         mav.setViewName("evolutions");
@@ -72,19 +68,6 @@ public class EvolutionsController extends BaseController
         mav.addObject("allIDs", allIDs);
         mav.addObject("isDarkMode", darkmode.equals("true"));
         return mav;
-    }
-
-    private void resetEvolutionParameters()
-    {
-        pokemonIDToEvolutionChainMap = this.pokemonService.getEvolutionsMap();
-        specificAttributesMap = generateDefaultAttributesMap();
-        if (null != pokemonFamily) pokemonFamily.clear();
-        this.pokemonFamilySize = 0;
-        this.pokemonChainID = 0;
-        if (null != pokemonFamilyAltLevels) pokemonFamilyAltLevels.clear();
-        if (null != allIDs) allIDs = new ArrayList<>();
-        if (null != stages) stages.clear();
-        stage = 0;
     }
 
     private void setupEvolutions()
