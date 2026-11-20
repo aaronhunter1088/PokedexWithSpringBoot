@@ -40,7 +40,7 @@
 ## Coding Patterns to Follow
 
 - **Java language level**: Use Java 25 features where appropriate (Streams over manual loops, final local variables, Optional over null returns).
-- **Dependency injection**: Use constructor injection with `@Autowired` on the constructor (as in all controllers and services).
+- **Dependency injection**: Use constructor injection. `@Autowired` is implied for a single constructor, so omit it unless a class has multiple constructors.
 - **Logging**: Use Log4j2 (`LogManager.getLogger(...)` as a private static logger) in each component.
 - **Controllers**: Extend `BaseController` for shared Pokemon enrichment, pagination, filtering, and UI state. Keep controller methods small; delegate enrichment to `BaseController#createPokemon(...)` and related helpers.
 - **Services**: Follow the state-holder pattern used by `DarkmodeService` and `GifService` (single boolean field, setter/getter, toggle when needed).
