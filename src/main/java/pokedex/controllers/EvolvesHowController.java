@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,11 +17,13 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.*;
 
 @Controller
+@RequestScope
 public class EvolvesHowController extends BaseController
 {
     /* Logging instance */
     private static final Logger logger = LogManager.getLogger(EvolvesHowController.class);
 
+    String pokemonId = "";
     Map<Integer, Map<String, Object>> pokemonIdAndAttributesMap;
     Map<String, Object> specificAttributesMap = Collections.emptyMap();
     Map<Integer, List<List<Integer>>> pokemonIDToEvolutionChainMap;

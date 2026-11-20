@@ -42,25 +42,9 @@ public class PokedexController extends BaseController
         if (nameOrId.equalsIgnoreCase("deoxys")) {
             nameOrId = "deoxys-normal";
         }
-        try {
-            pokemon = pokemonMap.get(Integer.valueOf(nameOrId)); // try as an Integer
-            if (pokemon == null) throw new NullPointerException("Pokemon was not found in the map...");
-        }
-        catch (Exception _) {
-            logger.warn("Couldn't find {} in pokemonMap", nameOrId);
-            String finalNameOrId = nameOrId;
-            final Optional<Pokemon> pokemonFound = pokemonMap.values().stream()
-                    .filter(pkmn -> pkmn.id().compareTo(Integer.valueOf(finalNameOrId)) == 0)
-                    .findFirst();
-            if (pokemonFound.isPresent()) {
-                logger.info("Found pokemon using id versus name");
-                pokemon = pokemonFound.get();
-            } else {
-                pokemon = pokemonService.getPokemonByIdOrName(nameOrId);
-            }
-        }
+        pokemon = pokemonService.getPokemonByIdOrName(nameOrId);
         pokemon = setupPokedex(pokemon);
-        mav.addObject("pokemonId", super.pokemonId);
+        mav.addObject("pokemonId", pokemon.getId().toString());
         mav.addObject("defaultImage", pokemon.sprites().getFrontDefault());
         mav.addObject("officialImage", pokemon.sprites().getOther().getOfficialArtwork().getFrontDefault());
         mav.addObject("gifImage", pokemon.sprites().getVersions().getGenerationV().getBlackWhite().getAnimated().getFrontDefault());
@@ -68,8 +52,8 @@ public class PokedexController extends BaseController
         mav.addObject("pokemon", pokemon);
         mav.addObject("randomDescriptionNumber", !pokemon.descriptions().isEmpty() ?
                 new Random().nextInt(pokemon.descriptions().size()) : 0);
-        mav.addObject("isDarkMode", isDarkMode = darkmodeService.isDarkmode());
-        mav.addObject("showGifs", showGifs = gifService.isShowGifs());
+        mav.addObject("isDarkMode", darkmodeService.isDarkmode());
+        mav.addObject("showGifs", gifService.isShowGifs());
         mav.addObject("uniqueTypes", getUniqueTypes());
         mav.setViewName("pokedex");
         return mav;
@@ -96,7 +80,6 @@ public class PokedexController extends BaseController
         }
         try {
             pokemon = createPokemon(pokemon, speciesData);
-            super.pokemonId = pokemon.getId().toString();
         }
         catch (Exception e) {
             logger.error("An error occurred while creating Pokemon:{}", pokemon.id());

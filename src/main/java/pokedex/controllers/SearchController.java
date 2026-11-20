@@ -33,8 +33,8 @@ public class SearchController extends BaseController
     {
         LOGGER.info("/search page called");
         //mav.addObject("pokemonId", 0);
-        mav.addObject("isDarkMode", isDarkMode = darkmodeService.isDarkmode());
-        mav.addObject("showGifs", showGifs = gifService.isShowGifs());
+        mav.addObject("isDarkMode", darkmodeService.isDarkmode());
+        mav.addObject("showGifs", gifService.isShowGifs());
         mav.setViewName("search");
         return mav;
     }

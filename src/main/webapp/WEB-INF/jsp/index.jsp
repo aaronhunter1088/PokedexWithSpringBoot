@@ -285,6 +285,7 @@
     <script>
         $(function() {
             logFromWhere('index');
+            window.currentPage = ${page};
             clearHomepageQueryParams();
             updateGifToggle(window.pokedexConfig.showGifs);
 

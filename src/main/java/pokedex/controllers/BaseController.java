@@ -1,6 +1,5 @@
 package pokedex.controllers;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,6 +34,7 @@ public class BaseController
     private static final int MAX_WAIT_ITERATIONS = 30; // Max iterations to wait (30 * 100ms = 3 seconds)
     private static final int TIMEOUT_MULTIPLIER = 20; // Multiplier for extended timeout (20 * 3s = 60 seconds)
     private static final int PROGRESS_LOG_INTERVAL = 50; // Log progress every 50 iterations (5 seconds)
+    private static final int FILTER_FETCH_PAGE_SIZE = 50; // Pokemon fetched per request while filtering by type
     @Value("${fetch.max.attempts:3}")
     private int HOMEPAGE_FETCH_MAX_ATTEMPTS;
     private final int HOMEPAGE_FETCH_RETRY_DELAY_MS = 250;
@@ -44,22 +44,18 @@ public class BaseController
     protected final Environment environment;
     protected final DarkmodeService darkmodeService;
     protected final GifService gifService;
-    protected String pokemonId = "";
-    protected int page = 1;
-    protected int lastPageSearched = 1;
-    protected int pkmnPerPage = 10;
-    protected NamedApiResourceList<Pokemon> pokemonList;
-    Map<Integer, Pokemon> pokemonMap = new TreeMap<>();
     Map<String, List<Pokemon>> filteredPokemonByType = new ConcurrentHashMap<>();
     Map<String, Boolean> filteringInProgress = new ConcurrentHashMap<>();
     private final ExecutorService filterExecutor = Executors.newFixedThreadPool(
         Math.min(Runtime.getRuntime().availableProcessors() * 2, 20));
     protected final AtomicBoolean retroactiveFetchingStarted = new AtomicBoolean(false);
-    int totalPokemon = 0;
-    boolean defaultImagePresent = false;
-    boolean showGifs = false;
-    String chosenType;
-    boolean isDarkMode = false;
+
+    /**
+     * One page of Pokemon along with the total number of Pokemon available.
+     * @param pokemon the Pokemon on the requested page, keyed by id
+     * @param totalPokemon the total number of Pokemon across all pages
+     */
+    protected record PokemonPage(Map<Integer, Pokemon> pokemon, int totalPokemon) {}
 
     @Autowired
     public BaseController(PokemonApiService pokemonService,
@@ -73,13 +69,6 @@ public class BaseController
         this.environment = environment;
         this.darkmodeService = darkmodeService;
         this.gifService = gifService;
-    }
-
-    @PostConstruct
-    public void postConstruct()
-    {
-        this.isDarkMode = darkmodeService.isDarkmode();
-        this.showGifs = gifService.isShowGifs();
     }
 
     @PreDestroy
@@ -229,17 +218,17 @@ public class BaseController
         }};
     }
 
-    protected void updateSessionMap()
+    /**
+     * Gets one page of Pokemon.
+     * @param requestedPage the 1-based page number
+     * @param pkmnPerPage the number of Pokemon per page
+     * @return the Pokemon on the page and the total number of Pokemon
+     */
+    protected PokemonPage getPokemonPage(final int requestedPage, final int pkmnPerPage)
     {
-        this.pokemonMap = getPokemonMap();
-        // TODO: Fix filterByType
-    }
-
-    public Map<Integer, Pokemon> getPokemonMap()
-    {
-        final int requestedPage = page;
         final int offset = Math.max(0, (requestedPage - 1) * pkmnPerPage);
         int expectedSize = 0;
+        int totalPokemon = 0;
         Map<Integer, Pokemon> fetchedPokemonMap = new TreeMap<>();
 
         LOGGER.info("page number: {}", requestedPage);
@@ -248,7 +237,8 @@ public class BaseController
         for (int attempt = 1; attempt <= HOMEPAGE_FETCH_MAX_ATTEMPTS; attempt++) {
             fetchedPokemonMap.clear();
             LOGGER.debug("Injected service class: {}", pokemonService.getClass().getName());
-            pokemonList = pokemonService.getAllPokemons(pkmnPerPage, offset);
+            final NamedApiResourceList<Pokemon> pokemonList = pokemonService.getAllPokemons(pkmnPerPage, offset);
+            if (pokemonList != null) totalPokemon = pokemonList.count();
             if (pokemonList == null || pokemonList.results() == null || pokemonList.results().isEmpty()) {
                 LOGGER.warn("Attempt {} returned no pokemon resources for page {}", attempt, requestedPage);
             } else {
@@ -257,7 +247,6 @@ public class BaseController
                 LOGGER.debug("pokemonList limit size: {}", listOfPokemon.size());
 
                 expectedSize = listOfPokemon.size();
-                totalPokemon = pokemonList.count();
                 listOfPokemon.forEach(pkmn -> {
                     Pokemon pokemon = pokemonService.getPokemonByIdOrName(pkmn.name());
                     if (pokemon == null) {
@@ -295,8 +284,7 @@ public class BaseController
                 });
 
                 if (fetchedPokemonMap.size() >= expectedSize) {
-                    this.pokemonMap = fetchedPokemonMap;
-                    return this.pokemonMap;
+                    return new PokemonPage(fetchedPokemonMap, totalPokemon);
                 }
                 LOGGER.warn("Attempt {} fetched {}/{} pokemon for page {}", attempt, fetchedPokemonMap.size(), expectedSize, requestedPage);
             }
@@ -313,10 +301,20 @@ public class BaseController
             }
         }
 
-        this.pokemonMap = fetchedPokemonMap;
         LOGGER.warn("Returning partial pokemonMap for page {} after {} attempts ({}/{})",
-                requestedPage, HOMEPAGE_FETCH_MAX_ATTEMPTS, this.pokemonMap.size(), expectedSize);
-        return this.pokemonMap;
+                requestedPage, HOMEPAGE_FETCH_MAX_ATTEMPTS, fetchedPokemonMap.size(), expectedSize);
+        return new PokemonPage(fetchedPokemonMap, totalPokemon);
+    }
+
+    /**
+     * Calculates how many pages are needed to show every Pokemon.
+     * @param totalPokemon the total number of Pokemon
+     * @param pkmnPerPage the number of Pokemon per page
+     * @return the number of pages, at least 1
+     */
+    protected static int calculateTotalPages(final int totalPokemon, final int pkmnPerPage)
+    {
+        return Math.max(1, (int) Math.ceil((double) totalPokemon / pkmnPerPage));
     }
 
     /**
@@ -410,14 +408,11 @@ public class BaseController
         LOGGER.info("Background thread: Gathering all Pokemon of type: {}", type);
         int currentPage = 1;
         int totalAllPokemon = pokemonService.getTotalPokemon(null);
-        int maxPages = (int) Math.ceil((double) totalAllPokemon / this.pkmnPerPage);
-        maxPages = (int) Math.ceil((double) totalAllPokemon % this.pkmnPerPage) == 0
-                ? maxPages
-                : maxPages + 1; // for any remainder pokemon left over
+        int maxPages = calculateTotalPages(totalAllPokemon, FILTER_FETCH_PAGE_SIZE);
 
         // Fetch all Pokemon and filter by type
         while (currentPage <= maxPages) {
-            NamedApiResourceList<Pokemon> pokemonList = pokemonService.getAllPokemons(this.pkmnPerPage, ((currentPage - 1) * this.pkmnPerPage));
+            NamedApiResourceList<Pokemon> pokemonList = pokemonService.getAllPokemons(FILTER_FETCH_PAGE_SIZE, ((currentPage - 1) * FILTER_FETCH_PAGE_SIZE));
             if (pokemonList != null && !pokemonList.results().isEmpty()) {
                 for (NamedApiResource<Pokemon> pkmnResource : pokemonList.results()) {
                     try {
@@ -509,10 +504,11 @@ public class BaseController
     }
 
     /**
-     * Gets the sprints for the Pokemon
-     * Map of Pokemon Name with their sprite values
+     * Gets the sprites for the given Pokemon
+     * @param pokemonMap the Pokemon to get sprites for
+     * @return Map of Pokemon Name with their sprite values
      */
-    public Map<String, Map<String, String>> getPokemonSprites() {
+    public Map<String, Map<String, String>> getPokemonSprites(final Map<Integer, Pokemon> pokemonMap) {
         //console.log(pokemon);
         Map<String, Map<String, String>> allSprites = new TreeMap<>();
         for(Pokemon pokemon : pokemonMap.values())

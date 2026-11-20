@@ -1,6 +1,5 @@
 package pokedex.controllers;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,11 +14,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import pokedex.services.DarkmodeService;
 import pokedex.services.GifService;
+import skaro.pokeapi.resource.pokemon.Pokemon;
 import pokedexapi.service.PokemonApiService;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 @Controller
 public class IndexController extends BaseController
@@ -28,6 +29,10 @@ public class IndexController extends BaseController
     private static final Logger LOGGER = LogManager.getLogger(IndexController.class);
     private static final String TILE_COLOR_SESSION_KEY = "tileColorParam";
     private static final String DEFAULT_TILE_COLOR = "#4CAF50";
+    private static final String PAGE_SESSION_KEY = "page";
+    private static final String PKMN_PER_PAGE_SESSION_KEY = "pkmnPerPage";
+    private static final int DEFAULT_PKMN_PER_PAGE = 10;
+    private static final int MAX_PKMN_PER_PAGE = 50;
 
     @Autowired
     public IndexController(PokemonApiService pokemonService,
@@ -42,7 +47,9 @@ public class IndexController extends BaseController
     @GetMapping("/")
     public ModelAndView homepage(ModelAndView mav, HttpSession httpSession,
            @RequestParam(name = "darkmode", required = false) String darkmode,
-           @RequestParam(name = "tileColor", required = false) String tileColor)
+           @RequestParam(name = "tileColor", required = false) String tileColor,
+           @RequestParam(name = "pageNumber", required = false) Integer pageNumber,
+           @RequestParam(name = "chosenType", required = false) String chosenType)
     {
         long startTime = System.nanoTime();
         if (StringUtils.hasText(darkmode)) {
@@ -52,15 +59,8 @@ public class IndexController extends BaseController
         if (StringUtils.hasText(tileColor)) {
             httpSession.setAttribute(TILE_COLOR_SESSION_KEY, sanitizeTileColor(tileColor));
         }
-        if (StringUtils.hasText(darkmode) && StringUtils.hasText(tileColor)) {
-            LOGGER.info("Homepage accessed with darkmode: {} and tileColor: {}", darkmode, tileColor);
-            //return new ModelAndView("redirect:/");
-        } else if (StringUtils.hasText(darkmode)) {
-            LOGGER.info("Homepage accessed with darkmode: {}", darkmode);
-            //return new ModelAndView("redirect:/");
-        }
-
-        ModelAndView homepage = renderHomepage(mav, httpSession);
+        final int pageToView = pageNumber != null ? pageNumber : getSessionPage(httpSession);
+        ModelAndView homepage = renderHomepage(mav, httpSession, pageToView, chosenType);
 
         long endTime = System.nanoTime();
         double duration = (endTime - startTime) / 1_000_000_000.0;
@@ -69,32 +69,47 @@ public class IndexController extends BaseController
         return homepage;
     }
 
-    private ModelAndView renderHomepage(ModelAndView mav, HttpSession httpSession)
+    private int getSessionPkmnPerPage(HttpSession httpSession)
     {
-        isDarkMode = darkmodeService.isDarkmode();
-        showGifs = gifService.isShowGifs();
+        return httpSession.getAttribute(PKMN_PER_PAGE_SESSION_KEY) instanceof Integer perPage
+                ? perPage : DEFAULT_PKMN_PER_PAGE;
+    }
 
-        lastPageSearched = page;
-        this.pokemonMap = getPokemonMap();
-        if (pokemonMap.isEmpty()) {
+    private int getSessionPage(HttpSession httpSession)
+    {
+        return httpSession.getAttribute(PAGE_SESSION_KEY) instanceof Integer page ? page : 1;
+    }
+
+    private ModelAndView renderHomepage(ModelAndView mav, HttpSession httpSession, int requestedPage, String chosenType)
+    {
+        final boolean isDarkMode = darkmodeService.isDarkmode();
+        final boolean showGifs = gifService.isShowGifs();
+        final int pkmnPerPage = getSessionPkmnPerPage(httpSession);
+
+        int page = Math.max(1, requestedPage);
+        PokemonPage pokemonPage = getPokemonPage(page, pkmnPerPage);
+        if (pokemonPage.pokemon().isEmpty()) {
             LOGGER.warn("Initial homepage fetch returned empty pokemonMap for page {}, retrying once", page);
-            this.pokemonMap = getPokemonMap();
+            pokemonPage = getPokemonPage(page, pkmnPerPage);
         }
-        httpSession.setAttribute("pokemonMap", pokemonMap);
+        final int totalPages = calculateTotalPages(pokemonPage.totalPokemon(), pkmnPerPage);
+        if (page > totalPages) {
+            page = totalPages;
+            pokemonPage = getPokemonPage(page, pkmnPerPage);
+        }
+        httpSession.setAttribute(PAGE_SESSION_KEY, page);
+        final Map<Integer, Pokemon> pokemonMap = pokemonPage.pokemon();
 
         mav.addObject("pokemonMap", pokemonMap);
-        mav.addObject("pokemonSprites", getPokemonSprites());
-        this.page = lastPageSearched;
+        mav.addObject("pokemonSprites", getPokemonSprites(pokemonMap));
         mav.addObject("pokemonIds", new ArrayList<>(pokemonMap.keySet()));
-        mav.addObject("defaultImagePresent", defaultImagePresent);
         mav.addObject("showGifs", showGifs);
         mav.addObject("pkmnPerPage", pkmnPerPage);
-        mav.addObject("totalPokemon", totalPokemon);
-        mav.addObject("totalPages", (int) Math.floor((double) totalPokemon / pkmnPerPage));
+        mav.addObject("totalPokemon", pokemonPage.totalPokemon());
+        mav.addObject("totalPages", totalPages);
         mav.addObject("page", page);
         mav.addObject("uniqueTypes", getUniqueTypes());
         mav.addObject("chosenType", chosenType);
-        //isDarkMode = darkmode.equals("true");
         mav.addObject("isDarkMode", isDarkMode);
         Object tileColorFromSession = httpSession.getAttribute(TILE_COLOR_SESSION_KEY);
         mav.addObject("tileColorParam", tileColorFromSession instanceof String ? tileColorFromSession : DEFAULT_TILE_COLOR);
@@ -110,7 +125,7 @@ public class IndexController extends BaseController
     public Boolean toggleGifs()
     {
         gifService.toggleShowGifs();
-        showGifs = gifService.isShowGifs();
+        final boolean showGifs = gifService.isShowGifs();
         LOGGER.info("showGifs: {}", showGifs);
         return showGifs;
     }
@@ -126,7 +141,7 @@ public class IndexController extends BaseController
         } else {
             darkmodeService.setDarkmode(requestedDarkmode);
         }
-        isDarkMode = darkmodeService.isDarkmode();
+        final boolean isDarkMode = darkmodeService.isDarkmode();
         httpSession.setAttribute("isDarkMode", isDarkMode);
         LOGGER.info("isDarkMode: {}", isDarkMode);
         return isDarkMode;
@@ -137,60 +152,38 @@ public class IndexController extends BaseController
                              ModelAndView mav, HttpSession httpSession)
     {
         LOGGER.info("pagination, page to view: {}", pageNumber);
-        if (pageNumber < 1) {
-            LOGGER.error("Page number must be at least 1, received: {}", pageNumber);
-            return mav;
-        } else if (pageNumber > Math.round((float) totalPokemon / pkmnPerPage)) {
-            LOGGER.error("Cannot pick a number more than there are pages");
-            return mav;
-        }
-        page = pageNumber;
-        // Clear pokemon map to force reload with new page
-        //this.pokemonMap.clear();
-        // Clear session cache when changing pages
-        httpSession.removeAttribute("pokemonMap");
-        return renderHomepage(mav, httpSession);
+        return renderHomepage(mav, httpSession, pageNumber, null);
     }
 
+    /**
+     * Stores the number of Pokemon per page for this session and returns the page that
+     * keeps the first visible Pokemon on screen.
+     */
     @GetMapping("/pkmnPerPage")
     @ResponseBody
     public ResponseEntity<String> getPokemonPerPage(@RequestParam(name = "pkmnPerPage", required = false, defaultValue = "10") int pkmnPerPage,
+                                                     @RequestParam(name = "currentPage", required = false, defaultValue = "1") int currentPage,
                                                      HttpSession httpSession)
     {
-        final int firstVisibleIndex = (page - 1) * this.pkmnPerPage;
         if (pkmnPerPage <= 0) {
             return ResponseEntity.badRequest().body("Invalid number of Pokemon per page");
-        } else {
-            if (pkmnPerPage > 50) {
-                LOGGER.info(pkmnPerPage + " is too high. Defaulting to 50");
-                this.pkmnPerPage = 50;
-            } else {
-                this.pkmnPerPage = pkmnPerPage;
-            }
         }
-        // Clear pokemon map to force reload with new page size
-        this.pokemonMap.clear();
-        // Keep the first visible Pokemon on screen by recalculating the page for the new size
-        final int lastPage = Math.max(1, (int) Math.ceil((double) totalPokemon / this.pkmnPerPage));
-        this.page = Math.min(lastPage, firstVisibleIndex / this.pkmnPerPage + 1);
-        // Clear session cache when Pokemon per page changes
-        httpSession.removeAttribute("pokemonMap");
-        LOGGER.info("pkmnPerPage updated to: {}", pkmnPerPage);
-        return ResponseEntity.ok().body("PkmnPerPage set");
+        final int oldPerPage = getSessionPkmnPerPage(httpSession);
+        final int newPerPage = Math.min(pkmnPerPage, MAX_PKMN_PER_PAGE);
+        final int firstVisibleIndex = (Math.max(1, currentPage) - 1) * oldPerPage;
+        final int newPage = firstVisibleIndex / newPerPage + 1;
+        httpSession.setAttribute(PKMN_PER_PAGE_SESSION_KEY, newPerPage);
+        httpSession.setAttribute(PAGE_SESSION_KEY, newPage);
+        LOGGER.info("pkmnPerPage updated to: {}", newPerPage);
+        return ResponseEntity.ok().body(String.valueOf(newPage));
     }
 
     @GetMapping(value = "/getPokemonByType")
     @ResponseBody
-    public ResponseEntity<String> getPokemonByType(@RequestParam(name = "chosenType", required = false, defaultValue = "") String chosenType,
-                                                   HttpSession httpSession)
+    public ResponseEntity<String> getPokemonByType(@RequestParam(name = "chosenType", required = false, defaultValue = "") String chosenType)
     {
-        String previousType = this.chosenType;
-        this.chosenType = !"none".equals(chosenType) ? chosenType : null;
-        // Reset page to 1 when changing filter
-        this.page = 1;
-        // Clear the pokemon map to force reload
-        this.pokemonMap.clear();
-        LOGGER.info("Type filter set to: {}", this.chosenType);
+        // TODO: Fix filterByType
+        LOGGER.info("Type filter requested: {}", chosenType);
         return ResponseEntity.ok().body("chosenType set");
     }
 

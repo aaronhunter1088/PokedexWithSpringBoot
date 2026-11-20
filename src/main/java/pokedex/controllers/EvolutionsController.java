@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
+@RequestScope
 public class EvolutionsController extends BaseController
 {
     /* Logging instance */
@@ -46,7 +48,6 @@ public class EvolutionsController extends BaseController
                                 GifService gifService)
     {
         super(pokemonService, objectMapper, environment, darkmodeService, gifService);
-        resetEvolutionParameters();
     }
 
     @GetMapping(value = "/evolutions/{pokemonId}")
@@ -55,7 +56,6 @@ public class EvolutionsController extends BaseController
     {
         //updateSessionMap();
         resetEvolutionParameters();
-        this.pokemonId = pokemonId;
         this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, pokemonId);
         setupEvolutions();
         mav.setViewName("evolutions");
@@ -70,7 +70,7 @@ public class EvolutionsController extends BaseController
         mav.addObject("stages", stages);
         mav.addObject("pokemonFamily", pokemonFamily);
         mav.addObject("allIDs", allIDs);
-        mav.addObject("isDarkMode", isDarkMode = darkmode.equals("true"));
+        mav.addObject("isDarkMode", darkmode.equals("true"));
         return mav;
     }
 

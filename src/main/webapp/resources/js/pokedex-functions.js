@@ -152,9 +152,10 @@ function syncGifState(showGifs) {
  */
 function clearHomepageQueryParams() {
     const currentUrl = new URL(window.location.href);
-    if (!currentUrl.searchParams.has('darkmode') && !currentUrl.searchParams.has('tileColor')) {
-        return;
-    }
+    // if (!currentUrl.searchParams.has('darkmode')
+    //     || !currentUrl.searchParams.has('tileColor')) {
+    //     return;
+    // }
 
     const cleanUrl = currentUrl.pathname + currentUrl.hash;
     window.history.replaceState({}, document.title, cleanUrl);
@@ -186,7 +187,8 @@ function setPkmnPerPageImpl(value, isMobile) {
         type: "GET",
         url: "pkmnPerPage",
         data: {
-            pkmnPerPage: value
+            pkmnPerPage: value,
+            currentPage: window.currentPage || 1
         },
         async: false,
         dataType: "application/json",
@@ -195,7 +197,8 @@ function setPkmnPerPageImpl(value, isMobile) {
             200: function(data) {
                 console.log(JSON.parse(JSON.stringify(data.responseText)));
                 if (isMobile) closeMobileMenu();
-                location.reload();
+                const newPage = parseInt(data.responseText, 10) || 1;
+                window.location.href = window.pokedexConfig.contextPath + "/?pageNumber=" + newPage;
                 clearHomepageQueryParams();
             },
             400: function(data) {
@@ -412,35 +415,11 @@ function searchForPkmn() {
  * @param pageNumber the page number to view
  */
 function setPageToView(pageNumber) {
-    //let value = pageNumber;
-    if (pageNumber === '') return;
+    if (pageNumber === undefined) pageNumber = $("#pageNumberMobile").val();
+    if (pageNumber === '' || pageNumber === undefined) return;
     console.log("page to view: " + pageNumber);
-    const contextPath = window.pokedexConfig.contextPath;
-    //const encodedNameOrId = encodeURIComponent(pageNumber);
-    $.ajax({
-        type: "GET",
-        url: contextPath + "/page",
-        dataType: "html",
-        data: {
-            pageNumber: pageNumber
-        }
-    }).done(function() {
-            const url = window.pokedexConfig.contextPath + "/page?pageNumber=" + encodeURIComponent(pageNumber);
-            console.log("Navigating to: " + url);
-            window.location.reload();
-            clearHomepageQueryParams();
-        })
-        .fail(function(xhr) {
-            console.log(xhr.responseText);
-
-            if (xhr.status === 400) {
-                alert("Page not found.");
-            } else {
-                alert("Page search failed. Please try again later.");
-            }
-        });
-    //const contextPath = "${pageContext.request.contextPath}";
-    //window.location.href = window.pokedexConfig.contextPath + "/page?pageNumber=" + encodeURIComponent(value);
+    window.location.href = window.pokedexConfig.contextPath + "/?pageNumber=" + encodeURIComponent(pageNumber);
+    clearHomepageQueryParams();
 }
 
 /**
@@ -470,6 +449,7 @@ function getByPkmnType(selectObject) {
                 console.log('200 chosenType');
                 // Navigate to homepage instead of reload to avoid duplicate fetching
                 window.location.href = window.pokedexConfig.contextPath + "/";
+                clearHomepageQueryParams();
             },
             400: function(data) {
                 console.log(JSON.parse(JSON.stringify(data.responseText)));
