@@ -1,5 +1,6 @@
 package pokedex.controllers;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpSession;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+@Hidden
 @Controller
 public class IndexController extends BaseController
 {
