@@ -195,6 +195,12 @@
         <br>
         <jsp:include page="navigation.jsp"/>
 
+        <c:if test="${loadFailed}">
+            <div id="loadRetryNotice" class="alert alert-warning text-center" role="alert">
+                Pokemon could not be loaded. Retrying automatically...
+            </div>
+        </c:if>
+
         <div id="pokemonGrid" class="list-grid" style="display:grid;">
             <c:forEach items="${pokemonMap.entrySet()}" var="pokemon">
                 <c:set var="pokemonId" value="${pokemon.value.id}" />
@@ -285,6 +291,19 @@
     <script>
         $(function() {
             logFromWhere('index');
+            const retryKey = 'homepageLoadRetries';
+            if ('${loadFailed}' === true) {
+                const retries = Number(sessionStorage.getItem(retryKey)) || 0;
+                if (retries < 5) {
+                    sessionStorage.setItem(retryKey, retries + 1);
+                    setTimeout(() => window.location.reload(), 3000);
+                } else {
+                    sessionStorage.removeItem(retryKey);
+                    $('#loadRetryNotice').text('Pokemon could not be loaded. Please try again later.');
+                }
+            } else {
+                sessionStorage.removeItem(retryKey);
+            }
             window.currentPage = ${page};
             clearHomepageQueryParams();
             updateGifToggle(window.pokedexConfig.showGifs);

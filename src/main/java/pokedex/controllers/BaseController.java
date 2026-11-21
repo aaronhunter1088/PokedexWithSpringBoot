@@ -4,8 +4,6 @@ import jakarta.annotation.PreDestroy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import pokedex.services.DarkmodeService;
@@ -31,9 +29,6 @@ public class BaseController
     /* Logging instance */
     private static final Logger LOGGER = LogManager.getLogger(BaseController.class);
     private static final int FILTER_FETCH_PAGE_SIZE = 50; // Pokemon fetched per request while filtering by type
-    @Value("${fetch.max.attempts:3}")
-    private int HOMEPAGE_FETCH_MAX_ATTEMPTS;
-    private final int HOMEPAGE_FETCH_RETRY_DELAY_MS = 250;
     
     protected final PokemonApiService pokemonApiService;
     protected final ObjectMapper objectMapper;
@@ -53,7 +48,6 @@ public class BaseController
      */
     protected record PokemonPage(Map<Integer, Pokemon> pokemon, int totalPokemon) {}
 
-    @Autowired
     public BaseController(PokemonApiService pokemonApiService,
                           ObjectMapper objectMapper,
                           Environment environment,
@@ -165,6 +159,7 @@ public class BaseController
                 .map(NamedApiResource::name)
                 .sorted()
                 .toList();
+        // Catch a blank color on speciesData by calling endpoint directly
         pokemon = Pokemon.from(pokemon, Map.of(
                 "defaultImage", defaultImage,
                 "officialImage", officialImage,
@@ -240,74 +235,60 @@ public class BaseController
         LOGGER.info("page number: {}", requestedPage);
         LOGGER.info("pkmnPerPage: {}", pkmnPerPage);
 
-        for (int attempt = 1; attempt <= HOMEPAGE_FETCH_MAX_ATTEMPTS; attempt++) {
-            fetchedPokemonMap.clear();
-            LOGGER.debug("Injected service class: {}", pokemonApiService.getClass().getName());
-            final NamedApiResourceList<Pokemon> pokemonList = pokemonApiService.getAllPokemons(pkmnPerPage, offset);
-            if (pokemonList != null) totalPokemon = pokemonList.count();
-            if (pokemonList == null || pokemonList.results() == null || pokemonList.results().isEmpty()) {
-                LOGGER.warn("Attempt {} returned no pokemon resources for page {}", attempt, requestedPage);
-            } else {
-                LOGGER.debug("pokemonList size: {}", pokemonList.results().size());
-                List<NamedApiResource<Pokemon>> listOfPokemon = pokemonList.results();
-                LOGGER.debug("pokemonList limit size: {}", listOfPokemon.size());
+        LOGGER.debug("Injected service class: {}", pokemonApiService.getClass().getName());
+        final NamedApiResourceList<Pokemon> pokemonList = pokemonApiService.getAllPokemons(pkmnPerPage, offset);
+        if (pokemonList != null) totalPokemon = pokemonList.count();
+        if (pokemonList == null || pokemonList.results() == null || pokemonList.results().isEmpty()) {
+            LOGGER.warn("No pokemon resources returned for page {}", requestedPage);
+        } else {
+            LOGGER.debug("pokemonList size: {}", pokemonList.results().size());
+            List<NamedApiResource<Pokemon>> listOfPokemon = pokemonList.results();
+            LOGGER.debug("pokemonList limit size: {}", listOfPokemon.size());
 
-                expectedSize = listOfPokemon.size();
-                listOfPokemon.forEach(pkmn -> {
-                    Pokemon pokemon = pokemonApiService.getPokemonByIdOrName(pkmn.name());
-                    if (pokemon == null) {
-                        LOGGER.warn("Skipping {} — getPokemonByIdOrName returned null (API may not be ready yet)", pkmn.name());
+            expectedSize = listOfPokemon.size();
+            listOfPokemon.forEach(pkmn -> {
+                Pokemon pokemon = pokemonApiService.getPokemonByIdOrName(pkmn.name());
+                if (pokemon == null) {
+                    LOGGER.warn("Skipping {} — getPokemonByIdOrName returned null (API may not be ready yet)", pkmn.name());
+                    return;
+                }
+                PokemonSpecies speciesData = null;
+                try {
+                    speciesData = pokemonApiService.getPokemonSpeciesData(pokemon.id().toString());
+                    if (speciesData != null) {
+                        LOGGER.debug("speciesData.color: {}", speciesData.getColor().name());
+                        pokemon = createPokemon(pokemon, speciesData);
+                        fetchedPokemonMap.put(pokemon.id(), pokemon);
+                    }
+                }
+                catch (Exception e) {
+                    LOGGER.warn("No speciesData found using {} and service species call", pkmn);
+                    if (pokemon.species() == null || pokemon.species().url() == null) {
+                        LOGGER.error("Cannot fall back for {} — species URL is null", pokemon.id());
                         return;
                     }
-                    PokemonSpecies speciesData = null;
+                    LOGGER.info("Trying direct call with species: {}, url: {}", pokemon.species().name(), pokemon.species().url());
                     try {
-                        speciesData = pokemonApiService.getPokemonSpeciesData(pokemon.id().toString());
-                        if (speciesData != null && speciesData.getColor() != null) {
-                            LOGGER.debug("speciesData.color: {}", speciesData.getColor().name());
-                            pokemon = createPokemon(pokemon, speciesData);
-                            fetchedPokemonMap.put(pokemon.id(), pokemon);
-                        }
+                        String responseBody = pokemonApiService.callUrl(pokemon.species().url()).body();
+                        speciesData = objectMapper.readValue(responseBody, PokemonSpecies.class);
+                        LOGGER.info("Successfully retrieved speciesData for pokemon id: {}", pokemon.id());
+                        pokemon = createPokemon(pokemon, speciesData);
+                        fetchedPokemonMap.put(pokemon.id(), pokemon);
                     }
-                    catch (Exception e) {
-                        LOGGER.warn("No speciesData found using {} and service species call", pkmn);
-                        if (pokemon.species() == null || pokemon.species().url() == null) {
-                            LOGGER.error("Cannot fall back for {} — species URL is null", pokemon.id());
-                            return;
-                        }
-                        LOGGER.info("Trying direct call with species: {}, url: {}", pokemon.species().name(), pokemon.species().url());
-                        try {
-                            String responseBody = pokemonApiService.callUrl(pokemon.species().url()).body();
-                            speciesData = objectMapper.readValue(responseBody, PokemonSpecies.class);
-                            LOGGER.info("Successfully retrieved speciesData for pokemon id: {}", pokemon.id());
-                            pokemon = createPokemon(pokemon, speciesData);
-                            fetchedPokemonMap.put(pokemon.id(), pokemon);
-                        }
-                        catch (Exception ex) {
-                            LOGGER.error("No speciesData found using {} and direct call. Empty speciesData created.", pokemon.id());
-                        }
+                    catch (Exception ex) {
+                        LOGGER.error("No speciesData found using {} and direct call. Empty speciesData created.", pokemon.id());
                     }
-                });
+                }
+            });
 
-                if (fetchedPokemonMap.size() >= expectedSize) {
-                    return new PokemonPage(fetchedPokemonMap, totalPokemon);
-                }
-                LOGGER.warn("Attempt {} fetched {}/{} pokemon for page {}", attempt, fetchedPokemonMap.size(), expectedSize, requestedPage);
+            if (fetchedPokemonMap.size() >= expectedSize) {
+                return new PokemonPage(fetchedPokemonMap, totalPokemon);
             }
-
-            if (attempt < HOMEPAGE_FETCH_MAX_ATTEMPTS) {
-                try {
-                    Thread.sleep(HOMEPAGE_FETCH_RETRY_DELAY_MS);
-                }
-                catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    LOGGER.error("Interrupted while retrying pokemon fetch for page {}", requestedPage, e);
-                    break;
-                }
-            }
+            LOGGER.warn("Fetched {}/{} pokemon for page {}", fetchedPokemonMap.size(), expectedSize, requestedPage);
         }
 
-        LOGGER.warn("Returning partial pokemonMap for page {} after {} attempts ({}/{})",
-                requestedPage, HOMEPAGE_FETCH_MAX_ATTEMPTS, fetchedPokemonMap.size(), expectedSize);
+        LOGGER.warn("Returning partial pokemonMap for page {} ({}/{})",
+                requestedPage, fetchedPokemonMap.size(), expectedSize);
         return new PokemonPage(fetchedPokemonMap, totalPokemon);
     }
 

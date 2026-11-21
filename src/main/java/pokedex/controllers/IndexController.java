@@ -90,10 +90,6 @@ public class IndexController extends BaseController
 
         int page = Math.max(1, requestedPage);
         PokemonPage pokemonPage = getPokemonPage(page, pkmnPerPage);
-        if (pokemonPage.pokemon().isEmpty()) {
-            LOGGER.warn("Initial homepage fetch returned empty pokemonMap for page {}, retrying once", page);
-            pokemonPage = getPokemonPage(page, pkmnPerPage);
-        }
         final int totalPages = calculateTotalPages(pokemonPage.totalPokemon(), pkmnPerPage);
         if (page > totalPages) {
             page = totalPages;
@@ -103,6 +99,7 @@ public class IndexController extends BaseController
         final Map<Integer, Pokemon> pokemonMap = pokemonPage.pokemon();
 
         mav.addObject("pokemonMap", pokemonMap);
+        mav.addObject("loadFailed", pokemonMap.isEmpty());
         mav.addObject("pokemonSprites", getPokemonSprites(pokemonMap));
         mav.addObject("pokemonIds", new ArrayList<>(pokemonMap.keySet()));
         mav.addObject("showGifs", showGifs);
