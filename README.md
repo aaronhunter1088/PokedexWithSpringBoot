@@ -3,6 +3,41 @@
 ![Homepage.png](src/main/webapp/images/springboot-homepage.png)
 [![Deploy Pokédex Spring Boot](https://github.com/aaronhunter1088/Pokedex-Manager/actions/workflows/deploy-pokedex-springboot.yml/badge.svg?branch=main)](https://github.com/aaronhunter1088/Pokedex-Manager/actions/workflows/deploy-pokedex-springboot.yml) [![Dependabot Updates](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/aaronhunter1088/PokedexWithSpringBoot/actions/workflows/dependabot/dependabot-updates)
 
+# v1.11.0
+This version is a large cleanup and hardening release.
+
+**Evolutions**
+- Evolves-How and Evolves-From now get their data from the PokedexApi evolution chain endpoints instead of a hardcoded
+  map, so newer Pokémon (including generation 9, e.g. Sprigatito's "Evolves At: Level 16") show correct information.
+- `EvolutionsController` no longer loops forever when species data is unavailable, and it resets its parameters
+  consistently. `EvolvesHowController` handles missing chain data gracefully.
+
+**Per-user state**
+- Page, Pokémon per page, dark mode, GIF mode and tile color are now stored in the user's HTTP session rather than in
+  singleton controllers and services, so one visitor no longer changes the view for everyone else.
+- Pokémon per page is validated (1-50) and the page number is clamped to the valid range.
+
+**Fixes**
+- The "Show GIFs" toggle is now a real boolean in the page config. Its state persists across the list, Pokédex and
+  search pages, the Pokédex page defaults to the GIF tab when GIFs are on, and the mobile menu reflects the state.
+- The `/search` page works again (it was missing the `showGifs` model value).
+- Looking up a Pokémon by name no longer fails in the error path, and the Pokémon list shows a retry notice when
+  loading fails.
+- Rotating a phone to landscape keeps the mobile layout instead of switching to the desktop one, and the Pokédex image is
+  sized correctly.
+- Back to Landing Page now uses the current host, so it goes to localhost when running locally.
+
+**Configuration**
+- Updates the PokedexApi dependency to 1.11.0. PokedexApi-only properties were consolidated into this app's
+  `application.properties`, and the redundant `pokeapi-reactor` version override was removed because the parent POM
+  manages it.
+- The `local` profile points the PokéAPI client at the local PokedexApi, and the Swagger URL honors the context path
+  in production and locally.
+
+**Tests**
+- Added JUnit 5 tests with nested positive and negative cases for every controller, both services and
+  `PokedexApplication`. Run them with `./mvnw test`.
+
 # v1.10.3
 This version updates the Evolves-How functionality to properly display the evolutions information.
 
