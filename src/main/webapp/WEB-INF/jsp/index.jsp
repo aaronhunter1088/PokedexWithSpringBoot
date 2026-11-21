@@ -292,7 +292,7 @@
         $(function() {
             logFromWhere('index');
             const retryKey = 'homepageLoadRetries';
-            if ('${loadFailed}' === true) {
+            if ($('#loadRetryNotice').length > 0) {
                 const retries = Number(sessionStorage.getItem(retryKey)) || 0;
                 if (retries < 5) {
                     sessionStorage.setItem(retryKey, retries + 1);

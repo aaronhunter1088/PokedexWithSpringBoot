@@ -10,7 +10,6 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 import pokedexapi.config.MyPokeApiReactorCachingConfiguration;
 
 import java.net.URI;
@@ -37,7 +36,6 @@ public class PokedexApplication extends SpringBootServletInitializer
     }
 
     @Bean
-    @Profile("local")
     WebServerFactoryCustomizer<TomcatServletWebServerFactory> localJspDocumentRootCustomizer()
     {
         return factory -> {
