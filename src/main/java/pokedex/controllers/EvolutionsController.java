@@ -5,10 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.servlet.ModelAndView;
 import pokedex.services.DarkmodeService;
 import pokedex.services.GifService;
@@ -20,7 +20,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestScope

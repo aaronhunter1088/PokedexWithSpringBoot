@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import pokedex.services.DarkmodeService;
 import pokedex.services.GifService;
-import skaro.pokeapi.resource.pokemon.Pokemon;
 import pokedexapi.service.PokemonApiService;
+import skaro.pokeapi.resource.pokemon.Pokemon;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;

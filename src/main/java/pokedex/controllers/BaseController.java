@@ -16,9 +16,11 @@ import skaro.pokeapi.resource.pokemon.*;
 import skaro.pokeapi.resource.pokemonspecies.PokemonSpecies;
 import tools.jackson.databind.ObjectMapper;
 
-import java.net.http.HttpResponse;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static pokedexapi.utilities.Constants.*;
