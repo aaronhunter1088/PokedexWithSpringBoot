@@ -26,7 +26,6 @@ public class EvolvesHowController extends BaseController
     String pokemonId = "";
     Map<Integer, Map<String, Object>> pokemonIdAndAttributesMap;
     Map<String, Object> specificAttributesMap = Collections.emptyMap();
-    Map<Integer, List<List<Integer>>> pokemonIDToEvolutionChainMap;
     Integer pokemonChainID = 0;
     List<Integer> allIDs = new ArrayList<>();
     List<List<Integer>> family = new ArrayList<>();
@@ -90,16 +89,14 @@ public class EvolvesHowController extends BaseController
     private void setupEvolvesHow()
     {
         resetState();
-        this.pokemonIDToEvolutionChainMap = this.pokemonApiService.getEvolutionsMap();
         this.pokemonIdAndAttributesMap = new HashMap<>();
         this.specificAttributesMap = generateDefaultAttributesMap();
-        this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, String.valueOf(pokemonId));
-        this.family = this.pokemonIDToEvolutionChainMap.getOrDefault(this.pokemonChainID, new ArrayList<>());
-        logger.info("family: {}", family);
-        this.allIDs = family.stream().flatMap(Collection::stream).toList();
-        logger.info("allIDs: {}", allIDs);
+        this.pokemonChainID = getEvolutionChainID(String.valueOf(pokemonId));
         if (pokemonChainID != 0) {
             Map<String, Object> chainResponse = pokemonApiService.getPokemonChainData(String.valueOf(pokemonChainID));
+            this.family = getFamilyIDs(chainResponse);
+            this.allIDs = family.stream().flatMap(Collection::stream).toList();
+            logger.info("allIDs: {}", allIDs);
             logger.info("chainResponse: {}", chainResponse);
             if (!chainResponse.isEmpty()) {
                 emptyChain = false;

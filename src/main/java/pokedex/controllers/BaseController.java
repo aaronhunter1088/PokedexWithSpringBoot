@@ -76,23 +76,53 @@ public class BaseController
         }
     }
 
-    protected Integer getEvolutionChainID(Map<Integer, List<List<Integer>>> pokemonIDToEvolutionChainMap, String pokemonId)
+    /**
+     * Gets the evolution chain id for a pokemon from its species data.
+     * @param pokemonId the pokemon id or name
+     * @return the chain id, or 0 if it could not be determined
+     */
+    protected Integer getEvolutionChainID(String pokemonId)
     {
         LOGGER.info("id: {}", pokemonId);
-        List<Integer> keys = pokemonIDToEvolutionChainMap.keySet().stream().toList();
-        Integer keyToReturn = 0;
-        keysLoop:
-        for (Integer key : keys) {
-            List<List<Integer>> pokemonIds = pokemonIDToEvolutionChainMap.get(key);
-            for (List<Integer> chainIds : pokemonIds) {
-                if (chainIds.contains(Integer.valueOf(pokemonId))) {
-                    keyToReturn = key;
-                    break keysLoop;
-                }
+        try {
+            final PokemonSpecies species = pokemonApiService.getPokemonSpeciesData(pokemonId);
+            if (species != null && species.getEvolutionChain() != null) {
+                return idFromUrl(species.getEvolutionChain().url());
             }
         }
-        LOGGER.info("chainKey: {}", keyToReturn);
-        return keyToReturn;
+        catch (Exception e) {
+            LOGGER.error("Could not get the evolution chain id for {}", pokemonId, e);
+        }
+        return 0;
+    }
+
+    /**
+     * Flattens an evolution chain into stages of species ids, e.g. [[1], [2], [3]].
+     * @param chainData the body returned by the EvolutionApi
+     * @return one list of ids per stage, empty if the chain is missing
+     */
+    @SuppressWarnings("unchecked")
+    protected List<List<Integer>> getFamilyIDs(Map<String, Object> chainData)
+    {
+        final List<List<Integer>> family = new ArrayList<>();
+        if (chainData == null || !(chainData.get("chain") instanceof Map)) return family;
+        List<Map<String, Object>> stage = List.of((Map<String, Object>) chainData.get("chain"));
+        while (!stage.isEmpty()) {
+            family.add(stage.stream()
+                    .map(link -> idFromUrl(((Map<String, String>) link.get("species")).get("url")))
+                    .toList());
+            stage = stage.stream()
+                    .flatMap(link -> ((List<Map<String, Object>>) link.get("evolves_to")).stream())
+                    .toList();
+        }
+        LOGGER.info("family: {}", family);
+        return family;
+    }
+
+    private static Integer idFromUrl(String url)
+    {
+        final String trimmed = url.replaceAll("/+$", "");
+        return Integer.valueOf(trimmed.substring(trimmed.lastIndexOf('/') + 1));
     }
 
     /**

@@ -28,7 +28,6 @@ public class EvolutionsController extends BaseController
 {
     /* Logging instance */
     private static final Logger LOGGER = LogManager.getLogger(EvolutionsController.class);
-    Map<Integer, List<List<Integer>>> pokemonIDToEvolutionChainMap;
     Integer pokemonChainID;
     List<List<Integer>> pokemonFamilyIDs;
     List<Integer> allIDs;
@@ -51,9 +50,7 @@ public class EvolutionsController extends BaseController
     public ModelAndView getEvolutions(@PathVariable String pokemonId, ModelAndView mav,
                                       @RequestParam(name = "darkmode", required = false, defaultValue = "false") String darkmode)
     {
-        // TODO: Replace with call to EvolutionChain API endpoint to get evolution chain data for the given pokemonId's evolution chain id
-        pokemonIDToEvolutionChainMap = pokemonApiService.getEvolutionsMap();
-        this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, pokemonId);
+        this.pokemonChainID = getEvolutionChainID(pokemonId);
         setupEvolutions();
         mav.setViewName("evolutions");
         if (pokemonFamilySize == 0) {
@@ -73,8 +70,9 @@ public class EvolutionsController extends BaseController
 
     private void setupEvolutions()
     {
-        pokemonFamilyIDs = pokemonIDToEvolutionChainMap.get(pokemonChainID);
-        if (pokemonFamilyIDs != null &&
+        pokemonFamilyIDs = pokemonChainID == 0 ? null
+                : getFamilyIDs(pokemonApiService.getPokemonChainData(String.valueOf(pokemonChainID)));
+        if (pokemonFamilyIDs != null && !pokemonFamilyIDs.isEmpty() &&
                 (pokemonFamilyIDs.size() != 1 || pokemonFamilyIDs.getFirst().size() != 1)) {
             setFamilySize();
             setStages();
