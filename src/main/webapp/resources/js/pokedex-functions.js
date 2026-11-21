@@ -501,15 +501,15 @@ function hideLoadingOverlay() {
  * Navigates to the landing page of the application, preserving the current dark mode state in the URL parameters.
  */
 function navigateToLandingPage() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const currentDarkMode = document.body.classList.contains("darkmode");
-    let url = "";
-    url = window.pokedexConfig.env !== "production" && isMobile
-        ? "http://" + window.location.hostname + ":4200?tileNumber=1&darkmode=" + currentDarkMode
-        : "http://localhost:4200?tileNumber=1&darkmode=" + currentDarkMode;
-    url = window.pokedexConfig.env === "production"
-        ? "https://mypokedex.us?tileNumber=1&darkmode=" + currentDarkMode
-        : url;
+    const hostname = window.location.hostname;
+    // Decide by where the app is served from, not the profile, since production can run locally
+    const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1"
+        || /^(192\.168|10)\./.test(hostname);
+    const landingPage = isLocalHost
+        ? "http://" + hostname + ":4200"
+        : "https://mypokedex.us";
+    const url = landingPage + "?tileNumber=1&darkmode=" + currentDarkMode;
     window.location.href = url;
 }
 
