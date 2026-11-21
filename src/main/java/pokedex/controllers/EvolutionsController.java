@@ -51,7 +51,8 @@ public class EvolutionsController extends BaseController
     public ModelAndView getEvolutions(@PathVariable String pokemonId, ModelAndView mav,
                                       @RequestParam(name = "darkmode", required = false, defaultValue = "false") String darkmode)
     {
-        pokemonIDToEvolutionChainMap = pokemonService.getEvolutionsMap();
+        // TODO: Replace with call to EvolutionChain API endpoint to get evolution chain data for the given pokemonId's evolution chain id
+        pokemonIDToEvolutionChainMap = pokemonApiService.getEvolutionsMap();
         this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, pokemonId);
         setupEvolutions();
         mav.setViewName("evolutions");
@@ -117,16 +118,16 @@ public class EvolutionsController extends BaseController
         String previousId = "";
         for (Integer id : idList) {
             LOGGER.info("id:{}", id);
-            Pokemon pokemonResponse = pokemonService.getPokemonByIdOrName(String.valueOf(id));
+            Pokemon pokemonResponse = pokemonApiService.getPokemonByIdOrName(String.valueOf(id));
             PokemonSpecies speciesData = null;
             try {
-                speciesData = pokemonService.getPokemonSpeciesData(String.valueOf(pokemonResponse.getId()));
+                speciesData = pokemonApiService.getPokemonSpeciesData(String.valueOf(pokemonResponse.getId()));
                 if (null != speciesData) previousId = String.valueOf(id);
             }
             catch (Exception e) {
                 LOGGER.warn("No species data found for {}. Using previousId {}", pokemonResponse.getId(), previousId);
                 try {
-                    speciesData = pokemonService.getPokemonSpeciesData(previousId);
+                    speciesData = pokemonApiService.getPokemonSpeciesData(previousId);
                 }
                 catch (Exception e2) {
                     LOGGER.error("No species data found using previousId {}", previousId);

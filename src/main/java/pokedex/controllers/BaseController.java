@@ -35,7 +35,7 @@ public class BaseController
     private int HOMEPAGE_FETCH_MAX_ATTEMPTS;
     private final int HOMEPAGE_FETCH_RETRY_DELAY_MS = 250;
     
-    protected final PokemonApiService pokemonService;
+    protected final PokemonApiService pokemonApiService;
     protected final ObjectMapper objectMapper;
     protected final Environment environment;
     protected final DarkmodeService darkmodeService;
@@ -54,13 +54,13 @@ public class BaseController
     protected record PokemonPage(Map<Integer, Pokemon> pokemon, int totalPokemon) {}
 
     @Autowired
-    public BaseController(PokemonApiService pokemonService,
+    public BaseController(PokemonApiService pokemonApiService,
                           ObjectMapper objectMapper,
                           Environment environment,
                           DarkmodeService darkmodeService,
                           GifService gifService)
     {
-        this.pokemonService = pokemonService;
+        this.pokemonApiService = pokemonApiService;
         this.objectMapper = objectMapper;
         this.environment = environment;
         this.darkmodeService = darkmodeService;
@@ -158,7 +158,7 @@ public class BaseController
             typeString = types.get(0).getType().name().substring(0, 1).toUpperCase() + types.get(0).getType().name().substring(1);
         }
         String pokemonLocation = pokemon.locationAreaEncounters();
-        List<String> locationEncounters = pokemonService.getPokemonLocationAreaEncounters(pokemonLocation);
+        List<String> locationEncounters = pokemonApiService.getPokemonLocationAreaEncounters(pokemonLocation);
 
         List<String> moves = pokemon.moves().stream()
                 .map(PokemonMove::getMove)
@@ -189,7 +189,7 @@ public class BaseController
     {
         LOGGER.info("retrievePokemon");
         try {
-            return pokemonService.getPokemonByIdOrName(nameOrId);
+            return pokemonApiService.getPokemonByIdOrName(nameOrId);
         }
         catch (Exception e) {
             LOGGER.error("Could not find pokemon with value: {}", nameOrId);
@@ -232,7 +232,7 @@ public class BaseController
      */
     protected PokemonPage getPokemonPage(final int requestedPage, final int pkmnPerPage)
     {
-        final int offset = Math.max(0, (requestedPage - 1) * pkmnPerPage);
+        final int offset = Math.max(0, (requestedPage - 1));
         int expectedSize = 0;
         int totalPokemon = 0;
         Map<Integer, Pokemon> fetchedPokemonMap = new TreeMap<>();
@@ -242,8 +242,8 @@ public class BaseController
 
         for (int attempt = 1; attempt <= HOMEPAGE_FETCH_MAX_ATTEMPTS; attempt++) {
             fetchedPokemonMap.clear();
-            LOGGER.debug("Injected service class: {}", pokemonService.getClass().getName());
-            final NamedApiResourceList<Pokemon> pokemonList = pokemonService.getAllPokemons(pkmnPerPage, offset);
+            LOGGER.debug("Injected service class: {}", pokemonApiService.getClass().getName());
+            final NamedApiResourceList<Pokemon> pokemonList = pokemonApiService.getAllPokemons(pkmnPerPage, offset);
             if (pokemonList != null) totalPokemon = pokemonList.count();
             if (pokemonList == null || pokemonList.results() == null || pokemonList.results().isEmpty()) {
                 LOGGER.warn("Attempt {} returned no pokemon resources for page {}", attempt, requestedPage);
@@ -254,14 +254,14 @@ public class BaseController
 
                 expectedSize = listOfPokemon.size();
                 listOfPokemon.forEach(pkmn -> {
-                    Pokemon pokemon = pokemonService.getPokemonByIdOrName(pkmn.name());
+                    Pokemon pokemon = pokemonApiService.getPokemonByIdOrName(pkmn.name());
                     if (pokemon == null) {
                         LOGGER.warn("Skipping {} — getPokemonByIdOrName returned null (API may not be ready yet)", pkmn.name());
                         return;
                     }
                     PokemonSpecies speciesData = null;
                     try {
-                        speciesData = pokemonService.getPokemonSpeciesData(pokemon.id().toString());
+                        speciesData = pokemonApiService.getPokemonSpeciesData(pokemon.id().toString());
                         if (speciesData != null && speciesData.getColor() != null) {
                             LOGGER.debug("speciesData.color: {}", speciesData.getColor().name());
                             pokemon = createPokemon(pokemon, speciesData);
@@ -276,7 +276,7 @@ public class BaseController
                         }
                         LOGGER.info("Trying direct call with species: {}, url: {}", pokemon.species().name(), pokemon.species().url());
                         try {
-                            String responseBody = pokemonService.callUrl(pokemon.species().url()).body();
+                            String responseBody = pokemonApiService.callUrl(pokemon.species().url()).body();
                             speciesData = objectMapper.readValue(responseBody, PokemonSpecies.class);
                             LOGGER.info("Successfully retrieved speciesData for pokemon id: {}", pokemon.id());
                             pokemon = createPokemon(pokemon, speciesData);
@@ -334,7 +334,7 @@ public class BaseController
         filterExecutor.submit(() -> {
             try {
                 // Get all types from the API
-                List<String> allTypes = pokemonService.getAllTypes();
+                List<String> allTypes = pokemonApiService.getAllTypes();
                 LOGGER.info("Found {} types to fetch Pokemon for", allTypes.size());
 
                 // For each type, start fetching Pokemon in parallel
@@ -412,16 +412,16 @@ public class BaseController
     {
         LOGGER.info("Background thread: Gathering all Pokemon of type: {}", type);
         int currentPage = 1;
-        int totalAllPokemon = pokemonService.getTotalPokemon(null);
+        int totalAllPokemon = pokemonApiService.getTotalPokemon(null);
         int maxPages = calculateTotalPages(totalAllPokemon, FILTER_FETCH_PAGE_SIZE);
 
         // Fetch all Pokemon and filter by type
         while (currentPage <= maxPages) {
-            NamedApiResourceList<Pokemon> pokemonList = pokemonService.getAllPokemons(FILTER_FETCH_PAGE_SIZE, ((currentPage - 1) * FILTER_FETCH_PAGE_SIZE));
+            NamedApiResourceList<Pokemon> pokemonList = pokemonApiService.getAllPokemons(FILTER_FETCH_PAGE_SIZE, ((currentPage - 1) * FILTER_FETCH_PAGE_SIZE));
             if (pokemonList != null && !pokemonList.results().isEmpty()) {
                 for (NamedApiResource<Pokemon> pkmnResource : pokemonList.results()) {
                     try {
-                        Pokemon pokemon = pokemonService.getPokemonByIdOrName(pkmnResource.name());
+                        Pokemon pokemon = pokemonApiService.getPokemonByIdOrName(pkmnResource.name());
                         // Check if Pokemon has the chosen type
                         boolean hasType = pokemon.types().stream()
                                 .anyMatch(pokemonType -> type.equalsIgnoreCase(pokemonType.getType().name()));
@@ -430,7 +430,7 @@ public class BaseController
                             // Get species data for color
                             PokemonSpecies speciesData = null;
                             try {
-                                speciesData = pokemonService.getPokemonSpeciesData(pokemon.id().toString());
+                                speciesData = pokemonApiService.getPokemonSpeciesData(pokemon.id().toString());
                             } catch (Exception e) {
                                 LOGGER.error("No speciesData found for pokemon id: {}", pokemon.id());
                             }
@@ -465,7 +465,7 @@ public class BaseController
                             // If image returns 404, reset gifImage to official image.
                             // If image returns 200, no change is needed
                             try {
-                                HttpResponse<String> response = pokemonService.callUrl(pokemon.gifImage());
+                                HttpResponse<String> response = pokemonApiService.callUrl(pokemon.gifImage());
                                 if (response.statusCode() == 404) {
                                     LOGGER.debug("GIF image not found for {}, using official image instead", pokemon.name());
                                     pokemon = Pokemon.from(pokemon, Map.of(
@@ -496,7 +496,7 @@ public class BaseController
     protected List<String> getUniqueTypes()
     {
         try {
-            return pokemonService.getAllTypes();
+            return pokemonApiService.getAllTypes();
         }
         catch (Exception e) {
             LOGGER.error("Error retrieving unique types: {}", e.getMessage());

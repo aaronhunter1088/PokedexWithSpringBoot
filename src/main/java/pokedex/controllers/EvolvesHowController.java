@@ -90,7 +90,7 @@ public class EvolvesHowController extends BaseController
     private void setupEvolvesHow()
     {
         resetState();
-        this.pokemonIDToEvolutionChainMap = this.pokemonService.getEvolutionsMap();
+        this.pokemonIDToEvolutionChainMap = this.pokemonApiService.getEvolutionsMap();
         this.pokemonIdAndAttributesMap = new HashMap<>();
         this.specificAttributesMap = generateDefaultAttributesMap();
         this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, String.valueOf(pokemonId));
@@ -99,7 +99,7 @@ public class EvolvesHowController extends BaseController
         this.allIDs = family.stream().flatMap(Collection::stream).toList();
         logger.info("allIDs: {}", allIDs);
         if (pokemonChainID != 0) {
-            Map<String, Object> chainResponse = pokemonService.getPokemonChainData(String.valueOf(pokemonChainID));
+            Map<String, Object> chainResponse = pokemonApiService.getPokemonChainData(String.valueOf(pokemonChainID));
             logger.info("chainResponse: {}", chainResponse);
             if (!chainResponse.isEmpty()) {
                 emptyChain = false;

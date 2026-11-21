@@ -16,7 +16,6 @@ import skaro.pokeapi.resource.pokemonspecies.PokemonSpecies;
 import tools.jackson.databind.ObjectMapper;
 
 import java.net.http.HttpResponse;
-import java.util.Optional;
 import java.util.Random;
 
 @Controller
@@ -42,7 +41,7 @@ public class PokedexController extends BaseController
         if (nameOrId.equalsIgnoreCase("deoxys")) {
             nameOrId = "deoxys-normal";
         }
-        pokemon = pokemonService.getPokemonByIdOrName(nameOrId);
+        pokemon = pokemonApiService.getPokemonByIdOrName(nameOrId);
         pokemon = setupPokedex(pokemon);
         mav.addObject("pokemonId", pokemon.getId().toString());
         mav.addObject("defaultImage", pokemon.sprites().getFrontDefault());
@@ -64,13 +63,13 @@ public class PokedexController extends BaseController
         logger.info("Loading pokedex info for {}", pokemon.name());
         PokemonSpecies speciesData = null;
         try {
-            speciesData = pokemonService.getPokemonSpeciesData(String.valueOf(pokemon.id()));
+            speciesData = pokemonApiService.getPokemonSpeciesData(String.valueOf(pokemon.id()));
         }
         catch (Exception e) {
             logger.warn("No species data found using {}", pokemon.id());
             logger.info("Trying with species: {}, url: {}", pokemon.species().name(), pokemon.species().url());
             try {
-                HttpResponse<String> data = pokemonService.callUrl(pokemon.species().url());
+                HttpResponse<String> data = pokemonApiService.callUrl(pokemon.species().url());
                 if (data.statusCode() == 200) {
                     speciesData = objectMapper.readValue(data.body(), PokemonSpecies.class);
                 }
