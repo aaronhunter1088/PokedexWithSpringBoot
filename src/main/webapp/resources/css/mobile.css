@@ -1,4 +1,10 @@
-/* Mobile Styles for Viewport <= 650px */
+/* Mobile Styles for Viewport <= 650px, and rotated phones (landscape, short viewport) */
+
+/* Stop iOS Safari from rescaling text/page when the device rotates */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
 
 /* Desktop styles - hide mobile menu by default */
 .mobile-header {
@@ -17,7 +23,7 @@
 }
 
 /* Mobile Media Query */
-@media screen and (max-width: 650px) {
+@media screen and (max-width: 650px), screen and (orientation: landscape) and (max-height: 500px) {
     
     :root {
         --mobile-header-height: 70px;
@@ -370,10 +376,10 @@
         margin: 5px 0;
     }
     
-    /* Smaller Pokemon image on mobile */
+    /* Match the Pokemon image size used on the list page */
     #pkmnImage {
-        width: 200px !important;
-        height: 200px !important;
+        width: 150px !important;
+        height: 150px !important;
     }
     
     /* Make buttons stack better on mobile */
@@ -428,10 +434,11 @@
         margin-bottom: 20px;
     }
     
-    /* Scroll container for evolution tiles - height increased to fit single tile content without scrolling */
+    /* Scroll container for evolution tiles - sizes to its content (no empty gap below a single tile) and scrolls past 520px */
     #evolutions > div > div[style*="overflow-y:scroll"] {
         width: 100% !important;
-        height: 520px !important; /* Fits: name/ID (~40px) + image (200px) + 4 stat lines (~160px) + padding (~120px) */
+        height: auto !important;
+        max-height: 520px !important;
     }
     
     #evolutions #stagesHeader {

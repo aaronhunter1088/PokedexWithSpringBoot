@@ -7,6 +7,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.servlet.ModelAndView;
 import pokedex.services.DarkmodeService;
 import pokedex.services.GifService;
@@ -16,14 +17,15 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.*;
 
 @Controller
+@RequestScope
 public class EvolvesHowController extends BaseController
 {
     /* Logging instance */
     private static final Logger logger = LogManager.getLogger(EvolvesHowController.class);
 
+    String pokemonId = "";
     Map<Integer, Map<String, Object>> pokemonIdAndAttributesMap;
     Map<String, Object> specificAttributesMap = Collections.emptyMap();
-    Map<Integer, List<List<Integer>>> pokemonIDToEvolutionChainMap;
     Integer pokemonChainID = 0;
     List<Integer> allIDs = new ArrayList<>();
     List<List<Integer>> family = new ArrayList<>();
@@ -87,16 +89,14 @@ public class EvolvesHowController extends BaseController
     private void setupEvolvesHow()
     {
         resetState();
-        this.pokemonIDToEvolutionChainMap = this.pokemonService.getEvolutionsMap();
         this.pokemonIdAndAttributesMap = new HashMap<>();
         this.specificAttributesMap = generateDefaultAttributesMap();
-        this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, String.valueOf(pokemonId));
-        this.family = this.pokemonIDToEvolutionChainMap.getOrDefault(this.pokemonChainID, new ArrayList<>());
-        logger.info("family: {}", family);
-        this.allIDs = family.stream().flatMap(Collection::stream).toList();
-        logger.info("allIDs: {}", allIDs);
+        this.pokemonChainID = getEvolutionChainID(String.valueOf(pokemonId));
         if (pokemonChainID != 0) {
-            Map<String, Object> chainResponse = pokemonService.getPokemonChainData(String.valueOf(pokemonChainID));
+            Map<String, Object> chainResponse = pokemonApiService.getPokemonChainData(String.valueOf(pokemonChainID));
+            this.family = getFamilyIDs(chainResponse);
+            this.allIDs = family.stream().flatMap(Collection::stream).toList();
+            logger.info("allIDs: {}", allIDs);
             logger.info("chainResponse: {}", chainResponse);
             if (!chainResponse.isEmpty()) {
                 emptyChain = false;

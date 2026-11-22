@@ -146,7 +146,7 @@
                          alt="pikachu gif preview"
                          title="If GIF is not present, official artwork will show and if still nothing, a Pokeball."
                          style="cursor:pointer;width:50px;height:50px;object-fit:contain;position:absolute;top:50%;left:50%;display:block;"
-                         onclick="handleGifPreviewClick();">
+                         onclick="toggleGifs();">
                 </div>
                 &emsp;
                 <div id="themeToggle" class="theme-toggle ${isDarkMode ? 'dark' : ''}">
@@ -194,6 +194,12 @@
         </div>
         <br>
         <jsp:include page="navigation.jsp"/>
+
+        <c:if test="${loadFailed}">
+            <div id="loadRetryNotice" class="alert alert-warning text-center" role="alert">
+                Pokemon could not be loaded. Retrying automatically...
+            </div>
+        </c:if>
 
         <div id="pokemonGrid" class="list-grid" style="display:grid;">
             <c:forEach items="${pokemonMap.entrySet()}" var="pokemon">
@@ -285,8 +291,22 @@
     <script>
         $(function() {
             logFromWhere('index');
+            const retryKey = 'homepageLoadRetries';
+            if ($('#loadRetryNotice').length > 0) {
+                const retries = Number(sessionStorage.getItem(retryKey)) || 0;
+                if (retries < 5) {
+                    sessionStorage.setItem(retryKey, retries + 1);
+                    setTimeout(() => window.location.reload(), 3000);
+                } else {
+                    sessionStorage.removeItem(retryKey);
+                    $('#loadRetryNotice').text('Pokemon could not be loaded. Please try again later.');
+                }
+            } else {
+                sessionStorage.removeItem(retryKey);
+            }
+            window.currentPage = ${page};
             clearHomepageQueryParams();
-            updateGifToggle(false);
+            updateGifToggle(window.pokedexConfig.showGifs);
 
             let ids = "${pokemonIds}".replace(/[\[\]]/g, '').split(',').map(id => id.trim());
             for(let i=0; i<ids.length; i++) {

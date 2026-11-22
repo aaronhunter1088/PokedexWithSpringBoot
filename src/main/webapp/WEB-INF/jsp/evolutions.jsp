@@ -45,7 +45,7 @@
                                     </div>
                                 </a>
                                 <c:if test="${!status.last}">
-                                    <div style="padding-top:25px; text-align:center; justify-content:center;">
+                                    <div style="padding-top:20px; padding-bottom:10px; text-align:center; justify-content:center;">
                                         <img style="width:25px;height:25px;" alt="pokeball"
                                              src="${pageContext.request.contextPath}/images/pokeball_search.png">
                                     </div>

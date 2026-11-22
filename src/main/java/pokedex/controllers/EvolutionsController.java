@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.annotation.RequestScope;
 import org.springframework.web.servlet.ModelAndView;
 import pokedex.services.DarkmodeService;
 import pokedex.services.GifService;
@@ -19,24 +20,20 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @Controller
+@RequestScope
 public class EvolutionsController extends BaseController
 {
     /* Logging instance */
     private static final Logger LOGGER = LogManager.getLogger(EvolutionsController.class);
-    Map<Integer, List<List<Integer>>> pokemonIDToEvolutionChainMap;
     Integer pokemonChainID;
     List<List<Integer>> pokemonFamilyIDs;
     List<Integer> allIDs;
     List<List<Pokemon>> pokemonFamily;
-    List<Integer> pokemonFamilyAltLevels;
-    Map<String, Object> specificAttributesMap;
-    Integer pokemonFamilySize;
+    Integer pokemonFamilySize = 0;
     List<Integer> stages;
     Integer stage = 0;
-    Integer counter = 0;
 
     @Autowired
     public EvolutionsController(PokemonApiService pokemonService,
@@ -46,17 +43,13 @@ public class EvolutionsController extends BaseController
                                 GifService gifService)
     {
         super(pokemonService, objectMapper, environment, darkmodeService, gifService);
-        resetEvolutionParameters();
     }
 
     @GetMapping(value = "/evolutions/{pokemonId}")
     public ModelAndView getEvolutions(@PathVariable String pokemonId, ModelAndView mav,
                                       @RequestParam(name = "darkmode", required = false, defaultValue = "false") String darkmode)
     {
-        //updateSessionMap();
-        resetEvolutionParameters();
-        this.pokemonId = pokemonId;
-        this.pokemonChainID = getEvolutionChainID(pokemonIDToEvolutionChainMap, pokemonId);
+        this.pokemonChainID = getEvolutionChainID(pokemonId);
         setupEvolutions();
         mav.setViewName("evolutions");
         if (pokemonFamilySize == 0) {
@@ -70,27 +63,15 @@ public class EvolutionsController extends BaseController
         mav.addObject("stages", stages);
         mav.addObject("pokemonFamily", pokemonFamily);
         mav.addObject("allIDs", allIDs);
-        mav.addObject("isDarkMode", isDarkMode = darkmode.equals("true"));
+        mav.addObject("isDarkMode", darkmode.equals("true"));
         return mav;
-    }
-
-    private void resetEvolutionParameters()
-    {
-        pokemonIDToEvolutionChainMap = this.pokemonService.getEvolutionsMap();
-        specificAttributesMap = generateDefaultAttributesMap();
-        if (null != pokemonFamily) pokemonFamily.clear();
-        this.pokemonFamilySize = 0;
-        this.pokemonChainID = 0;
-        if (null != pokemonFamilyAltLevels) pokemonFamilyAltLevels.clear();
-        if (null != allIDs) allIDs = new ArrayList<>();
-        if (null != stages) stages.clear();
-        stage = 0;
     }
 
     private void setupEvolutions()
     {
-        pokemonFamilyIDs = pokemonIDToEvolutionChainMap.get(pokemonChainID);
-        if (pokemonFamilyIDs != null &&
+        pokemonFamilyIDs = pokemonChainID == 0 ? null
+                : getFamilyIDs(pokemonApiService.getPokemonChainData(String.valueOf(pokemonChainID)));
+        if (pokemonFamilyIDs != null && !pokemonFamilyIDs.isEmpty() &&
                 (pokemonFamilyIDs.size() != 1 || pokemonFamilyIDs.getFirst().size() != 1)) {
             setFamilySize();
             setStages();
@@ -134,25 +115,26 @@ public class EvolutionsController extends BaseController
         String previousId = "";
         for (Integer id : idList) {
             LOGGER.info("id:{}", id);
-            Pokemon pokemonResponse = pokemonService.getPokemonByIdOrName(String.valueOf(id));
+            Pokemon pokemonResponse = pokemonApiService.getPokemonByIdOrName(String.valueOf(id));
             PokemonSpecies speciesData = null;
-            while (speciesData == null) {
+            try {
+                speciesData = pokemonApiService.getPokemonSpeciesData(String.valueOf(pokemonResponse.getId()));
+                if (null != speciesData) previousId = String.valueOf(id);
+            }
+            catch (Exception e) {
+                LOGGER.warn("No species data found for {}. Using previousId {}", pokemonResponse.getId(), previousId);
                 try {
-                    speciesData = pokemonService.getPokemonSpeciesData(String.valueOf(pokemonResponse.getId()));
-                    if (null != speciesData) previousId = String.valueOf(id);
+                    speciesData = pokemonApiService.getPokemonSpeciesData(previousId);
                 }
-                catch (Exception e) {
-                    LOGGER.warn("No species data found for {}. Using previousId {}", pokemonResponse.getId(), previousId);
-                    try {
-                        speciesData = pokemonService.getPokemonSpeciesData(previousId);
-                    }
-                    catch (Exception e2) {
-                        LOGGER.error("No species data found using previousId {}", previousId);
-                    }
+                catch (Exception e2) {
+                    LOGGER.error("No species data found using previousId {}", previousId);
                 }
             }
+            if (speciesData == null) {
+                LOGGER.error("Skipping pokemon {} in the evolution family: no species data available", id);
+                continue;
+            }
 
-            assert speciesData != null;
             Pokemon pokemon = createPokemon(pokemonResponse, speciesData);
             pokemonList.add(pokemon);
             LOGGER.info("pokemon added to familyList: {} length is {}", pokemon, pokemonList.size());
