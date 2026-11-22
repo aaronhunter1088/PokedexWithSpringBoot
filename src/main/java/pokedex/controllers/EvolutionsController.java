@@ -70,7 +70,7 @@ public class EvolutionsController extends BaseController
     private void setupEvolutions()
     {
         pokemonFamilyIDs = pokemonChainID == 0 ? null
-                : getFamilyIDs(pokemonApiService.getPokemonChainData(String.valueOf(pokemonChainID)));
+                : addAlternateForms(getFamilyIDs(pokemonApiService.getPokemonChainData(String.valueOf(pokemonChainID))));
         if (pokemonFamilyIDs != null && !pokemonFamilyIDs.isEmpty() &&
                 (pokemonFamilyIDs.size() != 1 || pokemonFamilyIDs.getFirst().size() != 1)) {
             setFamilySize();
@@ -84,6 +84,39 @@ public class EvolutionsController extends BaseController
             allIDs = null;
             pokemonFamily = null;
         }
+    }
+
+    /** Cosmetic Pikachu variants that should not be listed as evolution forms. */
+    private static final List<String> EXCLUDED_FORM_TOKENS =
+            List.of("-cap", "cosplay", "rock-star", "belle", "pop-star", "phd", "libre", "starter", "partner");
+
+    /**
+     * Adds each species' non-default varieties (mega, gmax, regional forms) to its stage.
+     * The evolution chain only lists species, so these forms would otherwise be missing.
+     */
+    private List<List<Integer>> addAlternateForms(final List<List<Integer>> family)
+    {
+        if (family.size() == 1 && family.getFirst().size() == 1) return family;
+        return family.stream().map(stage -> {
+            final List<Integer> ids = new ArrayList<>(stage);
+            stage.forEach(speciesId -> {
+                try {
+                    final PokemonSpecies species = pokemonApiService.getPokemonSpeciesData(String.valueOf(speciesId));
+                    if (species == null || species.getVarieties() == null) return;
+                    species.getVarieties().stream()
+                            .filter(v -> !Boolean.TRUE.equals(v.isDefault()) && v.getPokemon() != null)
+                            .filter(v -> EXCLUDED_FORM_TOKENS.stream().noneMatch(v.getPokemon().name()::contains))
+                            .map(v -> v.getPokemon().url().replaceAll("/+$", ""))
+                            .map(url -> Integer.valueOf(url.substring(url.lastIndexOf('/') + 1)))
+                            .filter(id -> !ids.contains(id))
+                            .forEach(ids::add);
+                }
+                catch (Exception e) {
+                    LOGGER.warn("Could not load forms for species {}: {}", speciesId, e.getMessage());
+                }
+            });
+            return ids;
+        }).toList();
     }
 
     private void setFamilySize()
